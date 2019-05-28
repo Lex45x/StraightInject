@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using Autofac;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using NUnit.Framework;
 using StraightInject.Core.Tests.Services;
@@ -6,20 +7,27 @@ using StraightInject.Core.Tests.Services;
 namespace StraightInject.Core.Tests.Benchmarking
 {
     [TestFixture]
-    [DisassemblyDiagnoser(printIL:true, recursiveDepth: 10)]
+    [DisassemblyDiagnoser(printIL: true, recursiveDepth: 10)]
     [MinColumn, MaxColumn, MeanColumn, MedianColumn, StdErrorColumn, StdDevColumn]
     public class DependencyInjectionBenchmarking
     {
-        private readonly DefaultDependencyMapper mapper;
         private readonly IContainer container;
+
+        private readonly Autofac.IContainer autofacContainer;
 
         public DependencyInjectionBenchmarking()
         {
-            mapper = DefaultDependencyMapper.Initialize();
+            var mapper = DefaultDependencyMapper.Initialize();
             mapper.MapType<PlainService>().SetServiceType<IPlainService>();
             mapper.MapType<DependentService>().SetServiceType<IDependentService>();
             mapper.MapType<DependencyService>().SetServiceType<IDependencyService>();
             container = mapper.Compile();
+
+            var builder = new ContainerBuilder();
+            builder.RegisterType<PlainService>().AsImplementedInterfaces();
+            builder.RegisterType<DependentService>().AsImplementedInterfaces();
+            builder.RegisterType<DependencyService>().AsImplementedInterfaces();
+            autofacContainer = builder.Build();
         }
 
         [Test]
@@ -38,6 +46,12 @@ namespace StraightInject.Core.Tests.Benchmarking
         public IPlainService ContainerInstantiate()
         {
             return container.Resolve<IPlainService>();
+        }
+
+        [Benchmark]
+        public IPlainService AutofacContainerInstantiate()
+        {
+            return autofacContainer.Resolve<IPlainService>();
         }
     }
 }
