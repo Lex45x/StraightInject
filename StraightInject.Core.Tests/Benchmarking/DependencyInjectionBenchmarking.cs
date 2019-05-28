@@ -6,29 +6,38 @@ using StraightInject.Core.Tests.Services;
 namespace StraightInject.Core.Tests.Benchmarking
 {
     [TestFixture]
-    public class CreateContainerBenchmarking
+    [DisassemblyDiagnoser(printIL:true, recursiveDepth: 10)]
+    [MinColumn, MaxColumn, MeanColumn, MedianColumn, StdErrorColumn, StdDevColumn]
+    public class DependencyInjectionBenchmarking
     {
         private readonly DefaultDependencyMapper mapper;
+        private readonly IContainer container;
 
-        public CreateContainerBenchmarking()
+        public DependencyInjectionBenchmarking()
         {
             mapper = DefaultDependencyMapper.Initialize();
             mapper.MapType<PlainService>().SetServiceType<IPlainService>();
             mapper.MapType<DependentService>().SetServiceType<IDependentService>();
             mapper.MapType<DependencyService>().SetServiceType<IDependencyService>();
+            container = mapper.Compile();
         }
 
         [Test]
-        [Ignore("Test run to infinite.")] //todo
         public void BenchmarkingRun()
         {
-            var summary = BenchmarkRunner.Run<CreateContainerBenchmarking>();
+            var summary = BenchmarkRunner.Run<DependencyInjectionBenchmarking>();
+        }
+
+        [Benchmark(Baseline = true)]
+        public IPlainService RawInstantiate()
+        {
+            return new PlainService();
         }
 
         [Benchmark]
-        public IContainer CreateContainer()
+        public IPlainService ContainerInstantiate()
         {
-            return mapper.Compile();
+            return container.Resolve<IPlainService>();
         }
     }
 }

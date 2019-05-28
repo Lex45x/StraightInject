@@ -11,7 +11,7 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void EmptyContainerCompilationTest()
         {
-            var compiler = new ContainerCompiler(new Dictionary<Type, IDependencyConstructor>());
+            var compiler = new DynamicAssemblyContainerCompiler(new Dictionary<Type, IDependencyConstructor>());
 
             var container = compiler.CompileDependencies(new Dictionary<Type, IDependency>());
 
@@ -23,7 +23,7 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void ContainerCompilationTest()
         {
-            var compiler = new ContainerCompiler(new Dictionary<Type, IDependencyConstructor>
+            var compiler = new DynamicAssemblyContainerCompiler(new Dictionary<Type, IDependencyConstructor>
             {
                 [typeof(TypeDependency)] = new TypeDependencyConstructor()
             });

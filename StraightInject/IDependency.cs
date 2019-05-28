@@ -8,4 +8,8 @@
         /// <typeparam name="TService"></typeparam>
         void SetServiceType<TService>();
     }
+
+    public interface IDependency<TOriginal> : IDependency
+    {
+    }
 }

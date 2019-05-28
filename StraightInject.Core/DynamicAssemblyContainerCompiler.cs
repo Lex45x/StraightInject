@@ -1,28 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Lokad.ILPack;
 
 namespace StraightInject.Core
 {
-    internal class ContainerCompiler : IContainerCompiler
+    internal class DynamicAssemblyContainerCompiler : IContainerCompiler
     {
         private readonly Dictionary<Type, IDependencyConstructor> dependencyConstructors;
 
         private readonly ModuleBuilder dynamicModule;
         private readonly AssemblyBuilder assembly;
 
-        public ContainerCompiler(Dictionary<Type, IDependencyConstructor> dependencyConstructors)
+        public DynamicAssemblyContainerCompiler(Dictionary<Type, IDependencyConstructor> dependencyConstructors)
         {
             this.dependencyConstructors = dependencyConstructors;
             var assemblyName =
-                new AssemblyName($"{typeof(ContainerCompiler).FullName}_Assembly_{Guid.NewGuid().ToString()}");
+                new AssemblyName(
+                    $"{typeof(DynamicAssemblyContainerCompiler).FullName}_Assembly_{Guid.NewGuid().ToString()}");
             assembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 
             dynamicModule =
                 assembly.DefineDynamicModule(
-                    $"{typeof(ContainerCompiler).FullName}_Module_{Guid.NewGuid().ToString()}");
+                    $"{typeof(DynamicAssemblyContainerCompiler).FullName}_Module_{Guid.NewGuid().ToString()}");
         }
 
         public IContainer CompileDependencies(Dictionary<Type, IDependency> dependencies)
@@ -34,7 +37,7 @@ namespace StraightInject.Core
             var resolveMethod = AppendResolveMethod(flatContainer, knownTypes);
 
             var type = flatContainer.CreateTypeInfo();
-
+            
             return Activator.CreateInstance(type) as IContainer;
         }
 
@@ -42,10 +45,10 @@ namespace StraightInject.Core
         {
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            foreach (var dependency in dependencies)
+            foreach (var (key, value) in dependencies)
             {
-                dependencyConstructors[dependency.Value.GetType()]
-                    .Construct(dependency.Key, dependency.Value, knownTypes, dependencies, new Stack<Type>());
+                dependencyConstructors[value.GetType()]
+                    .Construct(key, value, knownTypes, dependencies, new Stack<Type>());
             }
 
             return knownTypes;
@@ -66,8 +69,6 @@ namespace StraightInject.Core
                 MethodAttributes.NewSlot |
                 MethodAttributes.Final, resolveMethod.ReturnType,
                 parameters);
-
-            
 
             var genericParameters = methodBuilder.DefineGenericParameters("T");
             Type serviceTypeParameter = genericParameters.First();
@@ -100,7 +101,7 @@ namespace StraightInject.Core
             ilGenerator.MarkLabel(nextIf);
 
             ilGenerator.Emit(OpCodes.Ldstr, "There is no provider for your service");
-            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new []{typeof(string)});
+            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new[] {typeof(string)});
             ilGenerator.Emit(OpCodes.Newobj, defaultConstructor);
             ilGenerator.Emit(OpCodes.Throw);
 
@@ -143,7 +144,9 @@ namespace StraightInject.Core
 
             var ilGenerator = constructorBuilder.GetILGenerator();
 
-            for (var i = 0; i < parameters.Length + 1; i++)
+            ilGenerator.Emit(OpCodes.Ldarg_0);
+
+            for (var i = 1; i < parameters.Length; i++)
             {
                 ilGenerator.Emit(OpCodes.Ldarg, i);
             }
