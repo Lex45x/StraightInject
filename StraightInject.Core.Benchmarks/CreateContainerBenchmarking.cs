@@ -1,11 +1,9 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using NUnit.Framework;
-using StraightInject.Core.Tests.Services;
+using StraightInject.Core.Benchmarks.Services;
 
-namespace StraightInject.Core.Tests.Benchmarking
+namespace StraightInject.Core.Benchmarks
 {
-    [TestFixture]
     public class CreateContainerBenchmarking
     {
         private readonly DefaultDependencyMapper mapper;
@@ -16,13 +14,6 @@ namespace StraightInject.Core.Tests.Benchmarking
             mapper.MapType<PlainService>().SetServiceType<IPlainService>();
             mapper.MapType<DependentService>().SetServiceType<IDependentService>();
             mapper.MapType<DependencyService>().SetServiceType<IDependencyService>();
-        }
-
-        [Test]
-        [Ignore("Test run to infinite.")] //todo
-        public void BenchmarkingRun()
-        {
-            var summary = BenchmarkRunner.Run<CreateContainerBenchmarking>();
         }
 
         [Benchmark]

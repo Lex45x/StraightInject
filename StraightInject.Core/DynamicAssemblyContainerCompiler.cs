@@ -20,12 +20,11 @@ namespace StraightInject.Core
             this.dependencyConstructors = dependencyConstructors;
             var assemblyName =
                 new AssemblyName(
-                    $"{typeof(DynamicAssemblyContainerCompiler).FullName}_Assembly_{Guid.NewGuid().ToString()}");
+                    "DynamicContainer");
             assembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-
             dynamicModule =
                 assembly.DefineDynamicModule(
-                    $"{typeof(DynamicAssemblyContainerCompiler).FullName}_Module_{Guid.NewGuid().ToString()}");
+                    "DynamicContainer");
         }
 
         public IContainer CompileDependencies(Dictionary<Type, IDependency> dependencies)
@@ -37,7 +36,16 @@ namespace StraightInject.Core
             var resolveMethod = AppendResolveMethod(flatContainer, knownTypes);
 
             var type = flatContainer.CreateTypeInfo();
-            
+
+            //var generator = new AssemblyGenerator();
+
+            //var assemblyPath = Path.Combine(Path.GetTempPath(), $"DynamicIoC_{Guid.NewGuid().ToString()}.dll");
+            //generator.GenerateAssembly(assembly, assemblyPath);
+
+            //var loadedAssembly = Assembly.LoadFile(assemblyPath);
+
+            //var loadedType = loadedAssembly.GetType(type.FullName);
+
             return Activator.CreateInstance(type) as IContainer;
         }
 
@@ -79,7 +87,6 @@ namespace StraightInject.Core
             var equalityOperator = typeof(Type).GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static);
 
             var nextIf = ilGenerator.DefineLabel();
-
             foreach (var knownType in knownTypes)
             {
                 ilGenerator.MarkLabel(nextIf);
@@ -101,7 +108,10 @@ namespace StraightInject.Core
             ilGenerator.MarkLabel(nextIf);
 
             ilGenerator.Emit(OpCodes.Ldstr, "There is no provider for your service");
-            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new[] {typeof(string)});
+            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new[]
+            {
+                typeof(string)
+            });
             ilGenerator.Emit(OpCodes.Newobj, defaultConstructor);
             ilGenerator.Emit(OpCodes.Throw);
 
@@ -115,7 +125,7 @@ namespace StraightInject.Core
         private TypeBuilder GenerateFlatContainer()
         {
             var typeBuilder = dynamicModule.DefineType(
-                $"Container_{Guid.NewGuid().ToString()}",
+                "Container",
                 TypeAttributes.Public
                 | TypeAttributes.Class
                 | TypeAttributes.AutoClass
@@ -123,7 +133,10 @@ namespace StraightInject.Core
                 | TypeAttributes.AutoLayout
                 | TypeAttributes.Sealed,
                 typeof(object),
-                new[] {typeof(IContainer)});
+                new[]
+                {
+                    typeof(IContainer)
+                });
 
             DefineDefaultConstructor(typeBuilder);
 

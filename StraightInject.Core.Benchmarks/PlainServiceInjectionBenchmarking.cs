@@ -1,21 +1,24 @@
-﻿using Autofac;
+﻿using System.Reflection;
+using Abioc;
+using Abioc.Registration;
+using Autofac;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using NUnit.Framework;
-using StraightInject.Core.Tests.Services;
+using StraightInject.Core.Benchmarks.Services;
 
-namespace StraightInject.Core.Tests.Benchmarking
+namespace StraightInject.Core.Benchmarks
 {
-    [TestFixture]
     [DisassemblyDiagnoser(printIL: true, recursiveDepth: 10)]
     [MinColumn, MaxColumn, MeanColumn, MedianColumn, StdErrorColumn, StdDevColumn]
-    public class DependencyInjectionBenchmarking
+    public class PlainServiceInjectionBenchmarking
     {
         private readonly IContainer container;
 
         private readonly Autofac.IContainer autofacContainer;
 
-        public DependencyInjectionBenchmarking()
+        public readonly AbiocContainer abiocContainer;
+
+        public PlainServiceInjectionBenchmarking()
         {
             var mapper = DefaultDependencyMapper.Initialize();
             mapper.MapType<PlainService>().SetServiceType<IPlainService>();
@@ -28,12 +31,12 @@ namespace StraightInject.Core.Tests.Benchmarking
             builder.RegisterType<DependentService>().AsImplementedInterfaces();
             builder.RegisterType<DependencyService>().AsImplementedInterfaces();
             autofacContainer = builder.Build();
-        }
 
-        [Test]
-        public void BenchmarkingRun()
-        {
-            var summary = BenchmarkRunner.Run<DependencyInjectionBenchmarking>();
+            var registrationSetup = new RegistrationSetup();
+            registrationSetup.Register<IPlainService, PlainService>();
+            registrationSetup.Register<IDependentService, DependentService>();
+            registrationSetup.Register<IDependencyService, DependencyService>();
+            abiocContainer = registrationSetup.Construct(Assembly.GetExecutingAssembly());
         }
 
         [Benchmark(Baseline = true)]
@@ -52,6 +55,18 @@ namespace StraightInject.Core.Tests.Benchmarking
         public IPlainService AutofacContainerInstantiate()
         {
             return autofacContainer.Resolve<IPlainService>();
+        }
+
+        [Benchmark]
+        public IPlainService AbiocContainerInstantiate()
+        {
+            return abiocContainer.GetService<IPlainService>();
+        }
+
+        [Benchmark]
+        public IPlainService CompiledContainerInstantiate()
+        {
+            return abiocContainer.GetService<IPlainService>();
         }
     }
 }

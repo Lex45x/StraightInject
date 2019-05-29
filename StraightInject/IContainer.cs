@@ -1,4 +1,6 @@
-﻿namespace StraightInject
+﻿using System.Runtime.CompilerServices;
+
+namespace StraightInject
 {
     /// <summary>
     /// Represents IoC container access interface
@@ -10,6 +12,7 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         T Resolve<T>();
     }
 }
