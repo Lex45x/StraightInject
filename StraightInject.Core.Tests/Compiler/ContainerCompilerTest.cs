@@ -24,6 +24,12 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void ContainerCompilationTest()
         {
+            AppDomain.CurrentDomain.AssemblyLoad += (sender, args) =>
+            {
+                Console.WriteLine(
+                    $"Assembly loaded: {args.LoadedAssembly.FullName} from {args.LoadedAssembly.Location}");
+            };
+
             var compiler = new DynamicAssemblyContainerCompiler(new Dictionary<Type, IDependencyConstructor>
             {
                 [typeof(TypeDependency)] = new TypeDependencyConstructor()

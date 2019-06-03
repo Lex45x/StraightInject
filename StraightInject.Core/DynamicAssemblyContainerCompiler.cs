@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using DynamicContainer;
 using Lokad.ILPack;
 
 namespace StraightInject.Core
@@ -36,15 +37,6 @@ namespace StraightInject.Core
             var resolveMethod = AppendResolveMethod(flatContainer, knownTypes);
 
             var type = flatContainer.CreateTypeInfo();
-
-            //var generator = new AssemblyGenerator();
-
-            //var assemblyPath = Path.Combine(Path.GetTempPath(), $"DynamicIoC_{Guid.NewGuid().ToString()}.dll");
-            //generator.GenerateAssembly(assembly, assemblyPath);
-
-            //var loadedAssembly = Assembly.LoadFile(assemblyPath);
-
-            //var loadedType = loadedAssembly.GetType(type.FullName);
 
             return Activator.CreateInstance(type) as IContainer;
         }
