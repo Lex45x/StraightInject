@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -38,6 +40,16 @@ namespace StraightInject.Core
 
             var type = flatContainer.CreateTypeInfo();
 
+            if (Debugger.IsAttached)
+            {
+                var assemblyGenerator = new AssemblyGenerator();
+                var combine = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                
+                Debug.Print($"StraightInject generated assembly :: {combine}");
+                assemblyGenerator.GenerateAssembly(assembly, combine);
+            }
+
+
             return Activator.CreateInstance(type) as IContainer;
         }
 
@@ -52,6 +64,43 @@ namespace StraightInject.Core
             }
 
             return knownTypes;
+        }
+
+        protected virtual void AppendResolveMethodBody(ILGenerator body,
+            Type genericParameter,
+            Dictionary<Type, Action<ILGenerator>> knownTypes)
+        {
+            var getType = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+            var equalityOperator = typeof(Type).GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static);
+
+            var nextIf = body.DefineLabel();
+            foreach (var knownType in knownTypes)
+            {
+                body.MarkLabel(nextIf);
+                nextIf = body.DefineLabel();
+
+                body.Emit(OpCodes.Ldtoken, genericParameter);
+                body.Emit(OpCodes.Call, getType);
+                body.Emit(OpCodes.Ldtoken, knownType.Key);
+                body.Emit(OpCodes.Call, getType);
+                body.Emit(OpCodes.Call, equalityOperator);
+                body.Emit(OpCodes.Brfalse_S, nextIf);
+
+                knownType.Value(body);
+
+                body.Emit(OpCodes.Unbox_Any, genericParameter);
+                body.Emit(OpCodes.Ret);
+            }
+
+            body.MarkLabel(nextIf);
+
+            body.Emit(OpCodes.Ldstr, "There is no provider for your service");
+            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new[]
+            {
+                typeof(string)
+            });
+            body.Emit(OpCodes.Newobj, defaultConstructor);
+            body.Emit(OpCodes.Throw);
         }
 
         private MethodBuilder AppendResolveMethod(TypeBuilder flatContainer,
@@ -75,37 +124,7 @@ namespace StraightInject.Core
 
             var ilGenerator = methodBuilder.GetILGenerator();
 
-            var getType = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
-            var equalityOperator = typeof(Type).GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static);
-
-            var nextIf = ilGenerator.DefineLabel();
-            foreach (var knownType in knownTypes)
-            {
-                ilGenerator.MarkLabel(nextIf);
-                nextIf = ilGenerator.DefineLabel();
-
-                ilGenerator.Emit(OpCodes.Ldtoken, serviceTypeParameter);
-                ilGenerator.Emit(OpCodes.Call, getType);
-                ilGenerator.Emit(OpCodes.Ldtoken, knownType.Key);
-                ilGenerator.Emit(OpCodes.Call, getType);
-                ilGenerator.Emit(OpCodes.Call, equalityOperator);
-                ilGenerator.Emit(OpCodes.Brfalse_S, nextIf);
-
-                knownType.Value(ilGenerator);
-
-                ilGenerator.Emit(OpCodes.Unbox_Any, serviceTypeParameter);
-                ilGenerator.Emit(OpCodes.Ret);
-            }
-
-            ilGenerator.MarkLabel(nextIf);
-
-            ilGenerator.Emit(OpCodes.Ldstr, "There is no provider for your service");
-            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new[]
-            {
-                typeof(string)
-            });
-            ilGenerator.Emit(OpCodes.Newobj, defaultConstructor);
-            ilGenerator.Emit(OpCodes.Throw);
+            AppendResolveMethodBody(ilGenerator, serviceTypeParameter, knownTypes);
 
             flatContainer.DefineMethodOverride(methodBuilder, resolveMethod);
 

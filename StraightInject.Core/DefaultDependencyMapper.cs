@@ -11,7 +11,7 @@ namespace StraightInject.Core
         public static DefaultDependencyMapper Initialize()
         {
             return new DefaultDependencyMapper(
-                new DynamicAssemblyContainerCompiler(
+                new DynamicAssemblyBinarySearchContainerCompiler(
                     new Dictionary<Type, IDependencyConstructor>
                     {
                         [typeof(TypeDependency)] = new TypeDependencyConstructor()
@@ -33,6 +33,13 @@ namespace StraightInject.Core
             return wrapper;
         }
 
+        public IDependency MapType(Type implementationType)
+        {
+            var dependency = new TypeDependency(implementationType, dependencies);
+
+            return dependency;
+        }
+
         public IContainer Compile()
         {
             return compiler.CompileDependencies(dependencies);
@@ -50,6 +57,11 @@ namespace StraightInject.Core
             public void SetServiceType<TService>()
             {
                 implementation.SetServiceType<TService>();
+            }
+
+            public void SetServiceType(Type serviceType)
+            {
+                implementation.SetServiceType(serviceType);
             }
         }
     }

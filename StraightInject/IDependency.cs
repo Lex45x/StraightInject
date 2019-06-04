@@ -1,4 +1,6 @@
-﻿namespace StraightInject
+﻿using System;
+
+namespace StraightInject
 {
     public interface IDependency
     {
@@ -7,6 +9,8 @@
         /// </summary>
         /// <typeparam name="TService"></typeparam>
         void SetServiceType<TService>();
+
+        void SetServiceType(Type serviceType);
     }
 
     public interface IDependency<TOriginal> : IDependency

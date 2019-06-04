@@ -1,5 +1,6 @@
 ﻿using System;
 using BenchmarkDotNet.Running;
+using StraightInject.Core.Benchmarks.Container;
 
 namespace StraightInject.Core.Benchmarks
 {
@@ -7,7 +8,7 @@ namespace StraightInject.Core.Benchmarks
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<DependentServiceInjectionBenchmarking>();
+            var summary = BenchmarkRunner.Run<DependentServiceResolutionBenchmarking>();
         }
     }
 }

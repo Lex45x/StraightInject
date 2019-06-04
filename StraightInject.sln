@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StraightInject.Core", "Stra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StraightInject.Core.Tests", "StraightInject.Core.Tests\StraightInject.Core.Tests.csproj", "{B82366C0-50FB-410B-97B9-024BA7CA75C3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StraightInject.Core.Benchmarks", "StraightInject.Core.Benchmarks\StraightInject.Core.Benchmarks.csproj", "{FB432990-A706-4020-BB5C-65A50C2B6BF3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StraightInject.FakeAssembly.Container", "StraightInject.FakeAssembly.Container\StraightInject.FakeAssembly.Container.csproj", "{ABFC984A-B189-4B31-9ECB-50714BDD5D8E}"
 EndProject
 Global
@@ -31,10 +29,6 @@ Global
 		{B82366C0-50FB-410B-97B9-024BA7CA75C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B82366C0-50FB-410B-97B9-024BA7CA75C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B82366C0-50FB-410B-97B9-024BA7CA75C3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FB432990-A706-4020-BB5C-65A50C2B6BF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FB432990-A706-4020-BB5C-65A50C2B6BF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FB432990-A706-4020-BB5C-65A50C2B6BF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FB432990-A706-4020-BB5C-65A50C2B6BF3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ABFC984A-B189-4B31-9ECB-50714BDD5D8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ABFC984A-B189-4B31-9ECB-50714BDD5D8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABFC984A-B189-4B31-9ECB-50714BDD5D8E}.Release|Any CPU.ActiveCfg = Release|Any CPU

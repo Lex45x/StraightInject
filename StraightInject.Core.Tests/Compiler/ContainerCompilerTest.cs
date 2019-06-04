@@ -12,7 +12,7 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void EmptyContainerCompilationTest()
         {
-            var compiler = new DynamicAssemblyContainerCompiler(new Dictionary<Type, IDependencyConstructor>());
+            var compiler = new DynamicAssemblyBinarySearchContainerCompiler(new Dictionary<Type, IDependencyConstructor>());
 
             var container = compiler.CompileDependencies(new Dictionary<Type, IDependency>());
 
@@ -24,13 +24,7 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void ContainerCompilationTest()
         {
-            AppDomain.CurrentDomain.AssemblyLoad += (sender, args) =>
-            {
-                Console.WriteLine(
-                    $"Assembly loaded: {args.LoadedAssembly.FullName} from {args.LoadedAssembly.Location}");
-            };
-
-            var compiler = new DynamicAssemblyContainerCompiler(new Dictionary<Type, IDependencyConstructor>
+            var compiler = new DynamicAssemblyBinarySearchContainerCompiler(new Dictionary<Type, IDependencyConstructor>
             {
                 [typeof(TypeDependency)] = new TypeDependencyConstructor()
             });
@@ -40,6 +34,9 @@ namespace StraightInject.Core.Tests.Compiler
             dependencies.Add(typeof(IDependentService), new TypeDependency(typeof(DependentService), dependencies));
             dependencies.Add(typeof(IDependencyService), new TypeDependency(typeof(DependencyService), dependencies));
             dependencies.Add(typeof(IPlainService), new TypeDependency(typeof(PlainService), dependencies));
+            dependencies.Add(typeof(PlainService), new TypeDependency(typeof(PlainService), dependencies));
+            dependencies.Add(typeof(DependentService), new TypeDependency(typeof(DependentService), dependencies));
+            dependencies.Add(typeof(DependencyService), new TypeDependency(typeof(DependencyService), dependencies));
 
             var container = compiler.CompileDependencies(dependencies);
 
@@ -49,6 +46,9 @@ namespace StraightInject.Core.Tests.Compiler
             Assert.DoesNotThrow(() => container.Resolve<IDependentService>());
             Assert.DoesNotThrow(() => container.Resolve<IDependencyService>());
             Assert.DoesNotThrow(() => container.Resolve<IPlainService>());
+            Assert.DoesNotThrow(() => container.Resolve<PlainService>());
+            Assert.DoesNotThrow(() => container.Resolve<DependentService>());
+            Assert.DoesNotThrow(() => container.Resolve<DependencyService>());
         }
     }
 }

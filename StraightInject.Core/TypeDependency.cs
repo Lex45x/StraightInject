@@ -18,5 +18,10 @@ namespace StraightInject.Core
         {
             dictionary.Add(typeof(TService), this);
         }
+
+        public void SetServiceType(Type serviceType)
+        {
+            dictionary.Add(serviceType, this);
+        }
     }
 }
