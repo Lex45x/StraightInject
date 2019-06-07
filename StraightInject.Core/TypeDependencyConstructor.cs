@@ -35,23 +35,39 @@ namespace StraightInject.Core
             var constructors =
                 typeDependency.OriginalType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
 
-            var eagerConstructor = constructors.OrderByDescending(info => info.GetParameters().Length).First();
+            ConstructorInfo eagerConstructor = null;
 
-            foreach (var parameterInfo in eagerConstructor.GetParameters())
+            foreach (var constructor in constructors.OrderByDescending(info => info.GetParameters().Length))
             {
-                if (knownTypes.ContainsKey(parameterInfo.ParameterType)) continue;
+                var allParametersAvailable = true;
 
-                if (!dependencies.TryGetValue(parameterInfo.ParameterType, out var childDependency))
+                foreach (var parameterInfo in constructor.GetParameters())
                 {
-                    throw new NotImplementedException(
-                        $"Service {parameterInfo.ParameterType.FullName} from {typeDependency.OriginalType.FullName} eager constructor has no implementation provided.");
+                    if (knownTypes.ContainsKey(parameterInfo.ParameterType)) continue;
+
+                    if (!dependencies.TryGetValue(parameterInfo.ParameterType, out var childDependency))
+                    {
+                        allParametersAvailable = false;
+                        continue;
+                    }
+
+                    Construct(parameterInfo.ParameterType,
+                        childDependency,
+                        knownTypes,
+                        dependencies,
+                        constructionStack);
                 }
 
-                Construct(parameterInfo.ParameterType,
-                    childDependency,
-                    knownTypes,
-                    dependencies,
-                    constructionStack);
+                if (!allParametersAvailable) continue;
+
+                eagerConstructor = constructor;
+                break;
+            }
+
+            if (eagerConstructor == null)
+            {
+                throw new NotImplementedException(
+                    $"Couldn't find a constructor that will fit to registered services");
             }
 
             void GeneratorAction(ILGenerator generator)

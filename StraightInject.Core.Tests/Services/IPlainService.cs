@@ -3,8 +3,4 @@
     public interface IPlainService
     {
     }
-
-    public class PlainService : IPlainService
-    {
-    }
 }

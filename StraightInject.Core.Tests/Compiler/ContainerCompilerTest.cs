@@ -12,7 +12,7 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void EmptyContainerCompilationTest()
         {
-            var compiler = new DynamicAssemblyBinarySearchContainerCompiler(new Dictionary<Type, IDependencyConstructor>());
+            var compiler = new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(new Dictionary<Type, IDependencyConstructor>());
 
             var container = compiler.CompileDependencies(new Dictionary<Type, IDependency>());
 
@@ -24,7 +24,7 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void ContainerCompilationTest()
         {
-            var compiler = new DynamicAssemblyBinarySearchContainerCompiler(new Dictionary<Type, IDependencyConstructor>
+            var compiler = new DynamicAssemblyBinarySearchByMetadataTokenContainerCompiler(new Dictionary<Type, IDependencyConstructor>
             {
                 [typeof(TypeDependency)] = new TypeDependencyConstructor()
             });

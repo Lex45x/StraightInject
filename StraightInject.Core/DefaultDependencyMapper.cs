@@ -11,7 +11,7 @@ namespace StraightInject.Core
         public static DefaultDependencyMapper Initialize()
         {
             return new DefaultDependencyMapper(
-                new DynamicAssemblyBinarySearchContainerCompiler(
+                new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
                     new Dictionary<Type, IDependencyConstructor>
                     {
                         [typeof(TypeDependency)] = new TypeDependencyConstructor()

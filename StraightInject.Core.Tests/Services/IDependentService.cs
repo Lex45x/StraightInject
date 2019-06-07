@@ -1,6 +1,6 @@
 ﻿namespace StraightInject.Core.Tests.Services
 {
-    public class DependencyService : IDependencyService
+    public interface IDependentService
     {
     }
 }

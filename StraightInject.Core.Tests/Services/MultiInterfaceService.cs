@@ -108,8 +108,4 @@ namespace StraightInject.Core.Tests.Services
             throw new NotImplementedException();
         }
     }
-
-    public interface IMultiInterfaceService
-    {
-    }
 }
