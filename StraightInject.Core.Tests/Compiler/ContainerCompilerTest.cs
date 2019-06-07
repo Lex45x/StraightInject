@@ -24,7 +24,7 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void ContainerCompilationTest()
         {
-            var compiler = new DynamicAssemblyBinarySearchByMetadataTokenContainerCompiler(new Dictionary<Type, IDependencyConstructor>
+            var compiler = new DynamicAssemblyBinarySearchByTypeHandleContainerCompiler(new Dictionary<Type, IDependencyConstructor>
             {
                 [typeof(TypeDependency)] = new TypeDependencyConstructor()
             });

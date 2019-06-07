@@ -82,7 +82,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
             conceptContainerV2 = mapperV2.Compile();
 
             var mapperV3 = new DefaultDependencyMapper(
-                new DynamicAssemblyBinarySearchByMetadataTokenContainerCompiler(
+                new DynamicAssemblyBinarySearchByTypeHandleContainerCompiler(
                     new Dictionary<Type, IDependencyConstructor>
                     {
                         [typeof(TypeDependency)] = new TypeDependencyConstructor()

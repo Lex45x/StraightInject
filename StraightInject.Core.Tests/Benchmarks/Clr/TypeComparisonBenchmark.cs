@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
@@ -13,6 +14,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Clr
     {
         private static readonly Type TestType = typeof(TypeComparisonBenchmark);
         private static readonly int TestTypeHashCode = typeof(TypeComparisonBenchmark).GetHashCode();
+        private static readonly int TestTypeToken = typeof(TypeComparisonBenchmark).GetMetadataToken();
 
         [Test]
         public void RunBenchmarking()
@@ -39,6 +41,13 @@ namespace StraightInject.Core.Tests.Benchmarks.Clr
         public bool HashCodeEquals()
         {
             return typeof(TypeComparisonBenchmark).GetHashCode() == TestTypeHashCode;
+        }
+
+        [Benchmark]
+        [MethodImpl(MethodImplOptions.NoOptimization)]
+        public bool MetadataTokenEquals()
+        {
+            return typeof(TypeComparisonBenchmark).GetMetadataToken() == TestTypeHashCode;
         }
     }
 }

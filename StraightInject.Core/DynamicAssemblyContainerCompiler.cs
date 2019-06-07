@@ -120,8 +120,7 @@ namespace StraightInject.Core
                 parameters);
 
             var genericParameters = methodBuilder.DefineGenericParameters("T");
-            Type serviceTypeParameter = genericParameters.First();
-
+            var serviceTypeParameter = genericParameters.First();
             var ilGenerator = methodBuilder.GetILGenerator();
 
             AppendResolveMethodBody(ilGenerator, serviceTypeParameter, knownTypes);
