@@ -5,20 +5,20 @@ namespace StraightInject.Core.Tests.Benchmarks
 {
     public class CreateContainerBenchmarking
     {
-        private readonly DefaultDependencyMapper mapper;
+        private readonly DefaultDependencyComposer composer;
 
         public CreateContainerBenchmarking()
         {
-            mapper = DefaultDependencyMapper.Initialize();
-            mapper.MapType<PlainService>().SetServiceType<IPlainService>();
-            mapper.MapType<DependentService>().SetServiceType<IDependentService>();
-            mapper.MapType<DependencyService>().SetServiceType<IDependencyService>();
+            composer = DefaultDependencyComposer.Initialize();
+            composer.FromType<PlainService>().ToService<IPlainService>();
+            composer.FromType<DependentService>().ToService<IDependentService>();
+            composer.FromType<DependencyService>().ToService<IDependencyService>();
         }
 
         [Benchmark]
         public IContainer CreateContainer()
         {
-            return mapper.Compile();
+            return composer.Compile();
         }
     }
 }

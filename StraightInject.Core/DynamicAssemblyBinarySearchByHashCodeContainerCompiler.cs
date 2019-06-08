@@ -67,7 +67,7 @@ namespace StraightInject.Core
 
                 return;
             }
-
+            
             if (branch.Length == 2)
             {
                 var nextComparison = body.DefineLabel();

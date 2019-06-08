@@ -16,7 +16,7 @@ using StraightInject.Core.Tests.Services.EmptyServices;
 namespace StraightInject.Core.Tests.Benchmarks.Container
 {
     [TestFixture]
-    [SimpleJob(targetCount: 100, invocationCount: 10, launchCount: 10)]
+    [SimpleJob(targetCount: 100)]
     [DisassemblyDiagnoser(printIL: true)]
     [MinColumn, MaxColumn, MeanColumn, MedianColumn, StdErrorColumn, StdDevColumn]
     public class DependentServiceResolutionBenchmarks
@@ -61,7 +61,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
 
         public DependentServiceResolutionBenchmarks()
         {
-            var mapperV1 = new DefaultDependencyMapper(
+            var mapperV1 = new DefaultDependencyComposer(
                 new DynamicAssemblyContainerCompiler(
                     new Dictionary<Type, IDependencyConstructor>
                     {
@@ -71,7 +71,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
             AddRegistrations(mapperV1);
             conceptContainerV1 = mapperV1.Compile();
 
-            var mapperV2 = new DefaultDependencyMapper(
+            var mapperV2 = new DefaultDependencyComposer(
                 new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
                     new Dictionary<Type, IDependencyConstructor>
                     {
@@ -81,8 +81,8 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
             AddRegistrations(mapperV2);
             conceptContainerV2 = mapperV2.Compile();
 
-            var mapperV3 = new DefaultDependencyMapper(
-                new DynamicAssemblyBinarySearchByTypeHandleContainerCompiler(
+            var mapperV3 = new DefaultDependencyComposer(
+                new DynamicAssemblyTypeHandleJumpTableContainerCompiler(
                     new Dictionary<Type, IDependencyConstructor>
                     {
                         [typeof(TypeDependency)] = new TypeDependencyConstructor()
@@ -120,7 +120,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
         {
             foreach (var (key, value) in Registrations)
             {
-                mapper.MapType(value).SetServiceType(key);
+                mapper.FromType(value).ToService(key);
             }
         }
 

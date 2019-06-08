@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using DynamicContainer;
 using Lokad.ILPack;
+using StraightInject.Core.Debugging;
 
 namespace StraightInject.Core
 {
@@ -40,12 +41,11 @@ namespace StraightInject.Core
 
             var type = flatContainer.CreateTypeInfo();
 
-            if (Debugger.IsAttached)
+            if (DebugMode.Enabled())
             {
                 var assemblyGenerator = new AssemblyGenerator();
                 var combine = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                
-                Debug.Print($"StraightInject generated assembly :: {combine}");
+                Console.WriteLine($"StraightInject generated assembly :: {combine}");
                 assemblyGenerator.GenerateAssembly(assembly, combine);
             }
 

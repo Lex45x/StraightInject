@@ -9,14 +9,29 @@ namespace StraightInject
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IDependency<T> MapType<T>();
+        IComponentComposer<TComponent> FromType<TComponent>();
 
-        IDependency MapType(Type implementationType);
+        /// <summary>
+        /// Same as <see cref="FromTyperomType{TComponent}"/> but with implicit type passing
+        /// </summary>
+        /// <param name="implementationType"></param>
+        /// <returns></returns>
+        IComponentComposer FromType(Type implementationType);
 
         /// <summary>
         /// Compile existing map to a Completed container
         /// </summary>
         /// <returns></returns>
         IContainer Compile();
+    }
+
+    public interface IComponentComposer
+    {
+        void ToService<TService>();
+        void ToService(Type serviceType);
+    }
+
+    public interface IComponentComposer<TComponent> : IComponentComposer
+    {
     }
 }

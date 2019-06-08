@@ -6,22 +6,10 @@ namespace StraightInject.Core
     internal class TypeDependency : IDependency
     {
         public Type OriginalType { get; }
-        private readonly Dictionary<Type, IDependency> dictionary;
 
-        public TypeDependency(Type originalType, Dictionary<Type, IDependency> dictionary)
+        public TypeDependency(Type originalType)
         {
             OriginalType = originalType;
-            this.dictionary = dictionary;
-        }
-
-        public void SetServiceType<TService>()
-        {
-            dictionary.Add(typeof(TService), this);
-        }
-
-        public void SetServiceType(Type serviceType)
-        {
-            dictionary.Add(serviceType, this);
         }
     }
 }

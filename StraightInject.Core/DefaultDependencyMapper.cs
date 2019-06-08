@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace StraightInject.Core
 {
-    internal class DefaultDependencyMapper : IDependencyMapper
+    internal class DefaultDependencyComposer : IDependencyMapper
     {
         private readonly IContainerCompiler compiler;
         private readonly Dictionary<Type, IDependency> dependencies;
 
-        public static DefaultDependencyMapper Initialize()
+        public static DefaultDependencyComposer Initialize()
         {
-            return new DefaultDependencyMapper(
+            return new DefaultDependencyComposer(
                 new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
                     new Dictionary<Type, IDependencyConstructor>
                     {
@@ -18,26 +18,22 @@ namespace StraightInject.Core
                     }));
         }
 
-        internal DefaultDependencyMapper(IContainerCompiler compiler)
+        internal DefaultDependencyComposer(IContainerCompiler compiler)
         {
             this.compiler = compiler;
             dependencies = new Dictionary<Type, IDependency>();
         }
 
-        public IDependency<T> MapType<T>()
+        public IComponentComposer<TComponent> FromType<TComponent>()
         {
-            var dependency = new TypeDependency(typeof(T), dependencies);
-
-            var wrapper = new DependencyWrapper<T>(dependency);
+            var wrapper = new DefaultComposer<TComponent>(dependencies);
 
             return wrapper;
         }
 
-        public IDependency MapType(Type implementationType)
+        public IComponentComposer FromType(Type implementationType)
         {
-            var dependency = new TypeDependency(implementationType, dependencies);
-
-            return dependency;
+            return new DefaultComposer(implementationType, dependencies);
         }
 
         public IContainer Compile()
@@ -45,23 +41,45 @@ namespace StraightInject.Core
             return compiler.CompileDependencies(dependencies);
         }
 
-        internal class DependencyWrapper<T> : IDependency<T>
+        internal class DefaultComposer<T> : IComponentComposer<T>
         {
-            private readonly IDependency implementation;
+            private readonly Dictionary<Type, IDependency> dependencies;
 
-            public DependencyWrapper(IDependency implementation)
+            public DefaultComposer(Dictionary<Type, IDependency> dependencies)
             {
-                this.implementation = implementation;
+                this.dependencies = dependencies;
             }
 
-            public void SetServiceType<TService>()
+            public void ToService<TService>()
             {
-                implementation.SetServiceType<TService>();
+                dependencies.Add(typeof(TService), new TypeDependency(typeof(T)));
             }
 
-            public void SetServiceType(Type serviceType)
+            public void ToService(Type serviceType)
             {
-                implementation.SetServiceType(serviceType);
+                dependencies.Add(serviceType, new TypeDependency(typeof(T)));
+            }
+        }
+
+        internal class DefaultComposer : IComponentComposer
+        {
+            private readonly Type componentType;
+            private readonly Dictionary<Type, IDependency> dependencies;
+
+            public DefaultComposer(Type componentType, Dictionary<Type, IDependency> dependencies)
+            {
+                this.componentType = componentType;
+                this.dependencies = dependencies;
+            }
+
+            public void ToService<TService>()
+            {
+                dependencies.Add(typeof(TService), new TypeDependency(componentType));
+            }
+
+            public void ToService(Type serviceType)
+            {
+                dependencies.Add(serviceType, new TypeDependency(componentType));
             }
         }
     }
