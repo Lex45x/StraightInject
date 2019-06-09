@@ -9,6 +9,7 @@ using StraightInject.Core.ConstructorResolver;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
 using StraightInject.Core.Tests.Services;
+using StraightInject.Services;
 
 namespace StraightInject.Core.Tests.Compiler
 {
@@ -24,7 +25,7 @@ namespace StraightInject.Core.Tests.Compiler
             var serviceMock = Mock.Of<IService>(service => service.ServiceType == GetType());
 
             Assert.Throws<InvalidOperationException>(
-                () => constructor.Construct(serviceMock, knownTypes, dependencies));
+                () => constructor.Construct(null, serviceMock, knownTypes, dependencies));
         }
 
         [Test]
@@ -40,7 +41,7 @@ namespace StraightInject.Core.Tests.Compiler
             };
 
             Assert.Throws<NotImplementedException>(() =>
-                constructor.Construct(typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies));
+                constructor.Construct(null, typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies));
         }
 
         [Test]
@@ -56,7 +57,7 @@ namespace StraightInject.Core.Tests.Compiler
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            var action = constructor.Construct(typeDependency, knownTypes, dependencies);
+            var action = constructor.Construct(null, typeDependency, knownTypes, dependencies);
 
             Assert.IsNotNull(action);
 
@@ -82,11 +83,10 @@ namespace StraightInject.Core.Tests.Compiler
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            var construct = constructor.Construct(typedService, knownTypes, dependencies);
+            var construct = constructor.Construct(null, typedService, knownTypes, dependencies);
             knownTypes.Add(typedService.ServiceType, construct);
 
-            var action = constructor.Construct(
-                dependency,
+            var action = constructor.Construct(null, dependency,
                 knownTypes,
                 dependencies);
 

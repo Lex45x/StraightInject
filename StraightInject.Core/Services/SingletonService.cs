@@ -2,16 +2,11 @@
 
 namespace StraightInject.Core.Services
 {
-    internal class InstanceService : IService
+    internal class SingletonService : TypedService
     {
-        public object Instance { get; }
-
-        public InstanceService(object instance, Type serviceType)
+        public SingletonService(Type originalType, IConstructorResolver constructorResolver, Type serviceType) : base(
+            originalType, constructorResolver, serviceType)
         {
-            Instance = instance;
-            ServiceType = serviceType;
         }
-
-        public Type ServiceType { get; }
     }
 }

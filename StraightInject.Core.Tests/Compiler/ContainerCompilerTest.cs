@@ -8,6 +8,7 @@ using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
 using StraightInject.Core.Tests.Services;
 using StraightInject.Core.Tests.Services.EmptyServices;
+using StraightInject.Services;
 
 namespace StraightInject.Core.Tests.Compiler
 {

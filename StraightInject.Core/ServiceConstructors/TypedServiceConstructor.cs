@@ -5,12 +5,14 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using StraightInject.Core.Services;
+using StraightInject.Services;
 
 namespace StraightInject.Core.ServiceConstructors
 {
     internal class TypedServiceCompiler : IServiceCompiler
     {
-        public Action<ILGenerator> Construct(IService service, Dictionary<Type, Action<ILGenerator>> knownTypes,
+        public virtual Action<ILGenerator> Construct(Type flatContainer, IService service,
+            Dictionary<Type, Action<ILGenerator>> knownTypes,
             Dictionary<Type, IService> dependencies)
         {
             if (knownTypes.ContainsKey(service.ServiceType))

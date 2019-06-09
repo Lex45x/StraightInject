@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using StraightInject.Core.ConstructorResolver;
 using StraightInject.Core.Services;
+using StraightInject.Services;
 
 namespace StraightInject.Core.ComponentComposers
 {
-    internal class TypedComponentComposer<T> : IComponentComposer<T>
+    internal class TypedComponentComposer<T> : IComponentComposer<IConstructableService, T>
     {
         private readonly Dictionary<Type, IService> dependencies;
 
@@ -14,18 +15,26 @@ namespace StraightInject.Core.ComponentComposers
             this.dependencies = dependencies;
         }
 
-        public void ToService<TService>()
+        public IConstructableService ToService<TService>()
         {
-            dependencies.Add(typeof(TService), new TypedService(typeof(T), new EagerConstructorResolver(), typeof(TService)));
+            var typedService = new TypedService(typeof(T), new EagerConstructorResolver(), typeof(TService));
+            dependencies.Add(typeof(TService),
+                typedService);
+
+            return typedService;
+            ;
         }
 
-        public void ToService(Type serviceType)
+        public IConstructableService ToService(Type serviceType)
         {
-            dependencies.Add(serviceType, new TypedService(typeof(T), new EagerConstructorResolver(), serviceType));
+            var typedService = new TypedService(typeof(T), new EagerConstructorResolver(), serviceType);
+            dependencies.Add(serviceType, typedService);
+
+            return typedService;
         }
     }
 
-    internal class TypedComponentComposer : IComponentComposer
+    internal class TypedComponentComposer : IComponentComposer<IConstructableService>
     {
         private readonly Type componentType;
         private readonly Dictionary<Type, IService> dependencies;
@@ -36,14 +45,20 @@ namespace StraightInject.Core.ComponentComposers
             this.dependencies = dependencies;
         }
 
-        public void ToService<TService>()
+        public IConstructableService ToService<TService>()
         {
-            dependencies.Add(typeof(TService), new TypedService(componentType, new EagerConstructorResolver(), typeof(TService)));
+            var typedService = new TypedService(componentType, new EagerConstructorResolver(), typeof(TService));
+            dependencies.Add(typeof(TService), typedService);
+
+            return typedService;
         }
 
-        public void ToService(Type serviceType)
+        public IConstructableService ToService(Type serviceType)
         {
-            dependencies.Add(serviceType, new TypedService(componentType, new EagerConstructorResolver(), serviceType));
+            var typedService = new TypedService(componentType, new EagerConstructorResolver(), serviceType);
+            dependencies.Add(serviceType, typedService);
+
+            return typedService;
         }
     }
 }

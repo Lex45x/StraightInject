@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using StraightInject.Core.ComponentComposers;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
+using StraightInject.Services;
 
 namespace StraightInject.Core
 {
@@ -27,19 +28,19 @@ namespace StraightInject.Core
             dependencies = new Dictionary<Type, IService>();
         }
 
-        public IComponentComposer<TComponent> FromType<TComponent>()
+        public IComponentComposer<IConstructableService, TComponent> FromType<TComponent>()
         {
             var wrapper = new TypedComponentComposer<TComponent>(dependencies);
 
             return wrapper;
         }
 
-        public IComponentComposer FromType(Type implementationType)
+        public IComponentComposer<IConstructableService> FromType(Type implementationType)
         {
             return new TypedComponentComposer(implementationType, dependencies);
         }
 
-        public IComponentComposer<TComponent> FromInstance<TComponent>(TComponent instance)
+        public IComponentComposer<IService,TComponent> FromInstance<TComponent>(TComponent instance)
         {
             return new InstanceComponentComposer<TComponent>(dependencies, instance);
         }
@@ -48,5 +49,10 @@ namespace StraightInject.Core
         {
             return compiler.CompileDependencies(dependencies);
         }
+    }
+
+    internal interface IContainerInitialState
+    {
+
     }
 }

@@ -10,6 +10,7 @@ using DynamicContainer;
 using Lokad.ILPack;
 using StraightInject.Core.Debugging;
 using StraightInject.Core.ServiceConstructors;
+using StraightInject.Services;
 
 namespace StraightInject.Core
 {
@@ -34,10 +35,9 @@ namespace StraightInject.Core
 
         public IContainer CompileDependencies(Dictionary<Type, IService> dependencies)
         {
-            var knownTypes = GenerateIlAppenders(dependencies);
-
             var flatContainer = GenerateFlatContainer();
-
+            
+            var knownTypes = GenerateIlAppenders(flatContainer, dependencies);
             var resolveMethod = AppendResolveMethod(flatContainer, knownTypes);
 
             var type = flatContainer.CreateTypeInfo();
@@ -53,13 +53,13 @@ namespace StraightInject.Core
             return Activator.CreateInstance(type) as IContainer;
         }
 
-        private Dictionary<Type, Action<ILGenerator>> GenerateIlAppenders(Dictionary<Type, IService> dependencies)
+        private Dictionary<Type, Action<ILGenerator>> GenerateIlAppenders(Type flatContainer, Dictionary<Type, IService> dependencies)
         {
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
             foreach (var (key, value) in dependencies)
             {
-                var action = dependencyConstructors[value.GetType()].Construct(value, knownTypes, dependencies);
+                var action = dependencyConstructors[value.GetType()].Construct(flatContainer, value, knownTypes, dependencies);
                 knownTypes.Add(key, action);
             }
 
