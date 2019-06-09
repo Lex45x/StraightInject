@@ -3,84 +3,25 @@ using System.Collections.Generic;
 
 namespace StraightInject.Core
 {
-    internal class DefaultDependencyComposer : IDependencyMapper
+    internal class TypeComponentComposer : IComponentComposer
     {
-        private readonly IContainerCompiler compiler;
-        private readonly Dictionary<Type, IDependency> dependencies;
+        private readonly Type componentType;
+        private readonly Dictionary<Type, IService> dependencies;
 
-        public static DefaultDependencyComposer Initialize()
+        public TypeComponentComposer(Type componentType, Dictionary<Type, IService> dependencies)
         {
-            return new DefaultDependencyComposer(
-                new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
-                    new Dictionary<Type, IDependencyConstructor>
-                    {
-                        [typeof(TypeDependency)] = new TypeDependencyConstructor()
-                    }));
+            this.componentType = componentType;
+            this.dependencies = dependencies;
         }
 
-        internal DefaultDependencyComposer(IContainerCompiler compiler)
+        public void ToService<TService>()
         {
-            this.compiler = compiler;
-            dependencies = new Dictionary<Type, IDependency>();
+            dependencies.Add(typeof(TService), new TypedService(componentType));
         }
 
-        public IComponentComposer<TComponent> FromType<TComponent>()
+        public void ToService(Type serviceType)
         {
-            var wrapper = new DefaultComposer<TComponent>(dependencies);
-
-            return wrapper;
-        }
-
-        public IComponentComposer FromType(Type implementationType)
-        {
-            return new DefaultComposer(implementationType, dependencies);
-        }
-
-        public IContainer Compile()
-        {
-            return compiler.CompileDependencies(dependencies);
-        }
-
-        internal class DefaultComposer<T> : IComponentComposer<T>
-        {
-            private readonly Dictionary<Type, IDependency> dependencies;
-
-            public DefaultComposer(Dictionary<Type, IDependency> dependencies)
-            {
-                this.dependencies = dependencies;
-            }
-
-            public void ToService<TService>()
-            {
-                dependencies.Add(typeof(TService), new TypeDependency(typeof(T)));
-            }
-
-            public void ToService(Type serviceType)
-            {
-                dependencies.Add(serviceType, new TypeDependency(typeof(T)));
-            }
-        }
-
-        internal class DefaultComposer : IComponentComposer
-        {
-            private readonly Type componentType;
-            private readonly Dictionary<Type, IDependency> dependencies;
-
-            public DefaultComposer(Type componentType, Dictionary<Type, IDependency> dependencies)
-            {
-                this.componentType = componentType;
-                this.dependencies = dependencies;
-            }
-
-            public void ToService<TService>()
-            {
-                dependencies.Add(typeof(TService), new TypeDependency(componentType));
-            }
-
-            public void ToService(Type serviceType)
-            {
-                dependencies.Add(serviceType, new TypeDependency(componentType));
-            }
+            dependencies.Add(serviceType, new TypedService(componentType));
         }
     }
 }

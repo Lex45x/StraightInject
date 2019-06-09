@@ -2,11 +2,11 @@
 
 namespace StraightInject
 {
-    public interface IDependency
+    public interface IService
     {
     }
 
-    public interface IDependency<TOriginal> : IDependency
+    public interface IService<TOriginal> : IService
     {
     }
 }

@@ -6,6 +6,6 @@ namespace StraightInject.Core
 {
     internal interface IContainerCompiler
     {
-        IContainer CompileDependencies(Dictionary<Type, IDependency> dependencies);
+        IContainer CompileDependencies(Dictionary<Type, IService> dependencies);
     }
 }

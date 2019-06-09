@@ -63,9 +63,9 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
         {
             var mapperV1 = new DefaultDependencyComposer(
                 new DynamicAssemblyContainerCompiler(
-                    new Dictionary<Type, IDependencyConstructor>
+                    new Dictionary<Type, IServiceConstructor>
                     {
-                        [typeof(TypeDependency)] = new TypeDependencyConstructor()
+                        [typeof(TypedService)] = new TypedServiceConstructor()
                     }));
 
             AddRegistrations(mapperV1);
@@ -73,9 +73,9 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
 
             var mapperV2 = new DefaultDependencyComposer(
                 new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
-                    new Dictionary<Type, IDependencyConstructor>
+                    new Dictionary<Type, IServiceConstructor>
                     {
-                        [typeof(TypeDependency)] = new TypeDependencyConstructor()
+                        [typeof(TypedService)] = new TypedServiceConstructor()
                     }));
 
             AddRegistrations(mapperV2);
@@ -83,9 +83,9 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
 
             var mapperV3 = new DefaultDependencyComposer(
                 new DynamicAssemblyTypeHandleJumpTableContainerCompiler(
-                    new Dictionary<Type, IDependencyConstructor>
+                    new Dictionary<Type, IServiceConstructor>
                     {
-                        [typeof(TypeDependency)] = new TypeDependencyConstructor()
+                        [typeof(TypedService)] = new TypedServiceConstructor()
                     }));
 
             AddRegistrations(mapperV3);

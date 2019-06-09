@@ -14,9 +14,9 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void EmptyContainerCompilationTest()
         {
-            var compiler = new DynamicAssemblyTypeHandleJumpTableContainerCompiler(new Dictionary<Type, IDependencyConstructor>());
+            var compiler = new DynamicAssemblyTypeHandleJumpTableContainerCompiler(new Dictionary<Type, IServiceConstructor>());
 
-            var container = compiler.CompileDependencies(new Dictionary<Type, IDependency>());
+            var container = compiler.CompileDependencies(new Dictionary<Type, IService>());
 
             Assert.IsNotNull(container);
             Assert.Throws<NotImplementedException>(() => container.Resolve<object>());
@@ -28,25 +28,25 @@ namespace StraightInject.Core.Tests.Compiler
         {
             Environment.SetEnvironmentVariable("STRAIGHT_INJECT_ENABLE_DIAGNOSTIC", "true");
 
-            var compiler = new DynamicAssemblyTypeHandleJumpTableContainerCompiler(new Dictionary<Type, IDependencyConstructor>
+            var compiler = new DynamicAssemblyTypeHandleJumpTableContainerCompiler(new Dictionary<Type, IServiceConstructor>
             {
-                [typeof(TypeDependency)] = new TypeDependencyConstructor()
+                [typeof(TypedService)] = new TypedServiceConstructor()
             });
 
-            var dependencies = new Dictionary<Type, IDependency>();
+            var dependencies = new Dictionary<Type, IService>();
 
             foreach (var service in Assembly.GetExecutingAssembly().ExportedTypes
                 .Where(type => type.GetInterfaces().Contains(typeof(IEmptyService))))
             {
-                dependencies.Add(service, new TypeDependency(service));
+                dependencies.Add(service, new TypedService(service));
             }
 
-            dependencies.Add(typeof(IDependentService), new TypeDependency(typeof(DependentService)));
-            dependencies.Add(typeof(IDependencyService), new TypeDependency(typeof(DependencyService)));
-            dependencies.Add(typeof(IPlainService), new TypeDependency(typeof(PlainService)));
-            dependencies.Add(typeof(PlainService), new TypeDependency(typeof(PlainService)));
-            dependencies.Add(typeof(DependentService), new TypeDependency(typeof(DependentService)));
-            dependencies.Add(typeof(DependencyService), new TypeDependency(typeof(DependencyService)));
+            dependencies.Add(typeof(IDependentService), new TypedService(typeof(DependentService)));
+            dependencies.Add(typeof(IDependencyService), new TypedService(typeof(DependencyService)));
+            dependencies.Add(typeof(IPlainService), new TypedService(typeof(PlainService)));
+            dependencies.Add(typeof(PlainService), new TypedService(typeof(PlainService)));
+            dependencies.Add(typeof(DependentService), new TypedService(typeof(DependentService)));
+            dependencies.Add(typeof(DependencyService), new TypedService(typeof(DependencyService)));
 
             var container = compiler.CompileDependencies(dependencies);
 

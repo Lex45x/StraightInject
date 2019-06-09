@@ -7,16 +7,16 @@ using System.Text;
 
 namespace StraightInject.Core
 {
-    internal class TypeDependencyConstructor : IDependencyConstructor
+    internal class TypedServiceConstructor : IServiceConstructor
     {
-        public Action<ILGenerator> Construct(Type serviceType, IDependency dependency,
-            Dictionary<Type, Action<ILGenerator>> knownTypes, Dictionary<Type, IDependency> dependencies,
+        public Action<ILGenerator> Construct(Type serviceType, IService service,
+            Dictionary<Type, Action<ILGenerator>> knownTypes, Dictionary<Type, IService> dependencies,
             Stack<Type> constructionStack)
         {
             if (constructionStack.Contains(serviceType))
             {
                 throw new InvalidOperationException(
-                    $"Recursive dependency detected for service {serviceType.FullName}{constructionStack.Aggregate(new StringBuilder(), (builder, type) => builder.Append(" => ").Append(type.FullName))}");
+                    $"Recursive service detected for service {serviceType.FullName}{constructionStack.Aggregate(new StringBuilder(), (builder, type) => builder.Append(" => ").Append(type.FullName))}");
             }
 
             if (knownTypes.ContainsKey(serviceType))
@@ -26,10 +26,10 @@ namespace StraightInject.Core
 
             constructionStack.Push(serviceType);
 
-            if (!(dependency is TypeDependency typeDependency))
+            if (!(service is TypedService typeDependency))
             {
                 throw new InvalidOperationException(
-                    $"Invalid TypeDependencyConstructor usage on Non-TypeDependency. Original dependency: {dependency.GetType().FullName}");
+                    $"Invalid TypedServiceConstructor usage on Non-TypedService. Original service: {service.GetType().FullName}");
             }
 
             var constructors =
@@ -85,6 +85,16 @@ namespace StraightInject.Core
             knownTypes.Add(serviceType, GeneratorAction);
 
             return GeneratorAction;
+        }
+    }
+
+    internal class SingletonServiceConstructor : IServiceConstructor
+    {
+        public Action<ILGenerator> Construct(Type serviceType, IService service,
+            Dictionary<Type, Action<ILGenerator>> knownTypes, Dictionary<Type, IService> dependencies,
+            Stack<Type> constructionStack)
+        {
+            throw new NotImplementedException();
         }
     }
 }

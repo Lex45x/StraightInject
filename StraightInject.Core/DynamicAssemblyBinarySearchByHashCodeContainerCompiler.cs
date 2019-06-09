@@ -9,7 +9,7 @@ namespace StraightInject.Core
     internal class DynamicAssemblyBinarySearchByHashCodeContainerCompiler : DynamicAssemblyContainerCompiler
     {
         public DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
-            Dictionary<Type, IDependencyConstructor> dependencyConstructors) : base(dependencyConstructors)
+            Dictionary<Type, IServiceConstructor> dependencyConstructors) : base(dependencyConstructors)
         {
         }
 

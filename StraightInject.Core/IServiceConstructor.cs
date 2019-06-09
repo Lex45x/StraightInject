@@ -4,11 +4,11 @@ using System.Reflection.Emit;
 
 namespace StraightInject.Core
 {
-    internal interface IDependencyConstructor
+    internal interface IServiceConstructor
     {
-        Action<ILGenerator> Construct(Type serviceType, IDependency dependency,
+        Action<ILGenerator> Construct(Type serviceType, IService service,
             Dictionary<Type, Action<ILGenerator>> knownTypes,
-            Dictionary<Type, IDependency> dependencies,
+            Dictionary<Type, IService> dependencies,
             Stack<Type> constructionStack);
     }
 }

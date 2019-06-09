@@ -15,24 +15,24 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void InvalidDependencyTypeTest()
         {
-            var constructor = new TypeDependencyConstructor();
+            var constructor = new TypedServiceConstructor();
 
             Assert.Throws<InvalidOperationException>(() =>
                 constructor.Construct(
                     GetType(),
-                    Mock.Of<IDependency>(),
+                    Mock.Of<IService>(),
                     new Dictionary<Type, Action<ILGenerator>>(),
-                    new Dictionary<Type, IDependency>(),
+                    new Dictionary<Type, IService>(),
                     new Stack<Type>()));
         }
 
         [Test]
         public void RecursiveDependencyTest()
         {
-            var constructor = new TypeDependencyConstructor();
+            var constructor = new TypedServiceConstructor();
 
-            var typeDependency = new TypeDependency(GetType());
-            var dependencies = new Dictionary<Type, IDependency>
+            var typeDependency = new TypedService(GetType());
+            var dependencies = new Dictionary<Type, IService>
             {
                 [GetType()] = typeDependency
             };
@@ -49,10 +49,10 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void DependencyWithMissingReferenceTest()
         {
-            var constructor = new TypeDependencyConstructor();
+            var constructor = new TypedServiceConstructor();
 
-            var typeDependency = new TypeDependency(typeof(DependentService));
-            var dependencies = new Dictionary<Type, IDependency>
+            var typeDependency = new TypedService(typeof(DependentService));
+            var dependencies = new Dictionary<Type, IService>
             {
                 [typeof(DependentService)] = typeDependency
             };
@@ -69,10 +69,10 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void DependencyWithDefaultConstructorTest()
         {
-            var constructor = new TypeDependencyConstructor();
+            var constructor = new TypedServiceConstructor();
 
-            var typeDependency = new TypeDependency(GetType());
-            var dependencies = new Dictionary<Type, IDependency>
+            var typeDependency = new TypedService(GetType());
+            var dependencies = new Dictionary<Type, IService>
             {
                 [GetType()] = typeDependency
             };
@@ -83,7 +83,7 @@ namespace StraightInject.Core.Tests.Compiler
                 typeDependency.OriginalType,
                 typeDependency,
                 knownTypes,
-                new Dictionary<Type, IDependency>(),
+                new Dictionary<Type, IService>(),
                 new Stack<Type>());
             
             Assert.IsNotEmpty(knownTypes);
@@ -94,12 +94,12 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void DependencyWithDependentServiceConstructorTest()
         {
-            var constructor = new TypeDependencyConstructor();
+            var constructor = new TypedServiceConstructor();
 
-            var dependency = new TypeDependency(typeof(DependentService));
-            var dependencies = new Dictionary<Type, IDependency>
+            var dependency = new TypedService(typeof(DependentService));
+            var dependencies = new Dictionary<Type, IService>
             {
-                [typeof(IDependencyService)] = new TypeDependency(typeof(DependencyService)),
+                [typeof(IDependencyService)] = new TypedService(typeof(DependencyService)),
                 [typeof(DependentService)] = dependency
             };
 

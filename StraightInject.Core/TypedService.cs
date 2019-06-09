@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace StraightInject.Core
 {
-    internal class TypeDependency : IDependency
+    internal class TypedService : IService
     {
         public Type OriginalType { get; }
 
-        public TypeDependency(Type originalType)
+        public TypedService(Type originalType)
         {
             OriginalType = originalType;
         }

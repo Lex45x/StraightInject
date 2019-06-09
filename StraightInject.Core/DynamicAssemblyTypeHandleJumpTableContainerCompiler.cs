@@ -10,7 +10,7 @@ namespace StraightInject.Core
     internal class DynamicAssemblyTypeHandleJumpTableContainerCompiler : DynamicAssemblyContainerCompiler
     {
         public DynamicAssemblyTypeHandleJumpTableContainerCompiler(
-            Dictionary<Type, IDependencyConstructor> dependencyConstructors) : base(dependencyConstructors)
+            Dictionary<Type, IServiceConstructor> dependencyConstructors) : base(dependencyConstructors)
         {
         }
 

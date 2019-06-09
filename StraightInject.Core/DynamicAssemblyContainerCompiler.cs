@@ -14,12 +14,12 @@ namespace StraightInject.Core
 {
     internal class DynamicAssemblyContainerCompiler : IContainerCompiler
     {
-        private readonly Dictionary<Type, IDependencyConstructor> dependencyConstructors;
+        private readonly Dictionary<Type, IServiceConstructor> dependencyConstructors;
 
         private readonly ModuleBuilder dynamicModule;
         private readonly AssemblyBuilder assembly;
 
-        public DynamicAssemblyContainerCompiler(Dictionary<Type, IDependencyConstructor> dependencyConstructors)
+        public DynamicAssemblyContainerCompiler(Dictionary<Type, IServiceConstructor> dependencyConstructors)
         {
             this.dependencyConstructors = dependencyConstructors;
             var assemblyName =
@@ -31,7 +31,7 @@ namespace StraightInject.Core
                     "DynamicContainer");
         }
 
-        public IContainer CompileDependencies(Dictionary<Type, IDependency> dependencies)
+        public IContainer CompileDependencies(Dictionary<Type, IService> dependencies)
         {
             var knownTypes = GenerateIlAppenders(dependencies);
 
@@ -53,7 +53,7 @@ namespace StraightInject.Core
             return Activator.CreateInstance(type) as IContainer;
         }
 
-        private Dictionary<Type, Action<ILGenerator>> GenerateIlAppenders(Dictionary<Type, IDependency> dependencies)
+        private Dictionary<Type, Action<ILGenerator>> GenerateIlAppenders(Dictionary<Type, IService> dependencies)
         {
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
