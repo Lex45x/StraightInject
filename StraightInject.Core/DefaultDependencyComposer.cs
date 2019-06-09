@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using StraightInject.Core.ComponentComposers;
+using StraightInject.Core.ServiceConstructors;
+using StraightInject.Core.Services;
 
 namespace StraightInject.Core
 {
@@ -12,9 +15,9 @@ namespace StraightInject.Core
         {
             return new DefaultDependencyComposer(
                 new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
-                    new Dictionary<Type, IServiceConstructor>
+                    new Dictionary<Type, IServiceCompiler>
                     {
-                        [typeof(TypedService)] = new TypedServiceConstructor()
+                        [typeof(TypedService)] = new TypedServiceCompiler()
                     }));
         }
 
@@ -33,7 +36,7 @@ namespace StraightInject.Core
 
         public IComponentComposer FromType(Type implementationType)
         {
-            return new TypeComponentComposer(implementationType, dependencies);
+            return new TypedComponentComposer(implementationType, dependencies);
         }
 
         public IComponentComposer<TComponent> FromInstance<TComponent>(TComponent instance)

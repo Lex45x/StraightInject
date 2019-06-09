@@ -17,5 +17,13 @@ namespace StraightInject.Core.Debugging
             var enabled = bool.Parse(environmentVariable);
             return enabled;
         }
+
+        public static void Execute(Action action)
+        {
+            if (Enabled())
+            {
+                action();
+            }
+        }
     }
 }

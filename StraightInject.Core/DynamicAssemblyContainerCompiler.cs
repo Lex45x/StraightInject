@@ -9,17 +9,18 @@ using System.Reflection.Emit;
 using DynamicContainer;
 using Lokad.ILPack;
 using StraightInject.Core.Debugging;
+using StraightInject.Core.ServiceConstructors;
 
 namespace StraightInject.Core
 {
     internal class DynamicAssemblyContainerCompiler : IContainerCompiler
     {
-        private readonly Dictionary<Type, IServiceConstructor> dependencyConstructors;
+        private readonly Dictionary<Type, IServiceCompiler> dependencyConstructors;
 
         private readonly ModuleBuilder dynamicModule;
         private readonly AssemblyBuilder assembly;
 
-        public DynamicAssemblyContainerCompiler(Dictionary<Type, IServiceConstructor> dependencyConstructors)
+        public DynamicAssemblyContainerCompiler(Dictionary<Type, IServiceCompiler> dependencyConstructors)
         {
             this.dependencyConstructors = dependencyConstructors;
             var assemblyName =
@@ -49,7 +50,6 @@ namespace StraightInject.Core
                 assemblyGenerator.GenerateAssembly(assembly, combine);
             }
 
-
             return Activator.CreateInstance(type) as IContainer;
         }
 
@@ -59,8 +59,8 @@ namespace StraightInject.Core
 
             foreach (var (key, value) in dependencies)
             {
-                dependencyConstructors[value.GetType()]
-                    .Construct(key, value, knownTypes, dependencies, new Stack<Type>());
+                var action = dependencyConstructors[value.GetType()].Construct(value, knownTypes, dependencies);
+                knownTypes.Add(key, action);
             }
 
             return knownTypes;

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace StraightInject
 {
@@ -33,5 +35,10 @@ namespace StraightInject
 
     public interface IComponentComposer<TComponent> : IComponentComposer
     {
+    }
+
+    public interface IConstructorResolver
+    {
+        ConstructorInfo Resolve(Type component, Dictionary<Type, IService> dependencies);
     }
 }

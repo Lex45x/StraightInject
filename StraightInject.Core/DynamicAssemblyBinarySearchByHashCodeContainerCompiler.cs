@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using StraightInject.Core.ServiceConstructors;
 
 namespace StraightInject.Core
 {
     internal class DynamicAssemblyBinarySearchByHashCodeContainerCompiler : DynamicAssemblyContainerCompiler
     {
         public DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
-            Dictionary<Type, IServiceConstructor> dependencyConstructors) : base(dependencyConstructors)
+            Dictionary<Type, IServiceCompiler> dependencyConstructors) : base(dependencyConstructors)
         {
         }
 

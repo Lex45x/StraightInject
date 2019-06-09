@@ -33,6 +33,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Clr
         [MethodImpl(MethodImplOptions.NoOptimization)]
         public bool ClrEqualsWithoutGetRealtimeType()
         {
+            // ReSharper disable once EqualExpressionComparison
             return TestType == TestType;
         }
 

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using StraightInject.Core.Services;
 
-namespace StraightInject.Core
+namespace StraightInject.Core.ComponentComposers
 {
     internal class InstanceComponentComposer<T> : IComponentComposer<T>
     {
@@ -16,12 +17,12 @@ namespace StraightInject.Core
 
         public void ToService<TService>()
         {
-            dependencies.Add(typeof(TService), new SingletonService(instance));
+            dependencies.Add(typeof(TService), new InstanceService(instance, typeof(TService)));
         }
 
         public void ToService(Type serviceType)
         {
-            dependencies.Add(serviceType, new SingletonService(instance));
+            dependencies.Add(serviceType, new InstanceService(instance, serviceType));
         }
     }
 }
