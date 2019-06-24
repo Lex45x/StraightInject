@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using StraightInject.Core.Compilers;
 using StraightInject.Core.ComponentComposers;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
@@ -7,15 +8,22 @@ using StraightInject.Services;
 
 namespace StraightInject.Core
 {
+    /// <summary>
+    /// Default composer of the whole dependency hierarchy
+    /// </summary>
     internal class DefaultDependencyComposer : IDependencyMapper
     {
         private readonly IContainerCompiler compiler;
         private readonly Dictionary<Type, IService> dependencies;
 
+        /// <summary>
+        /// Create an instance with default settings
+        /// </summary>
+        /// <returns></returns>
         public static DefaultDependencyComposer Initialize()
         {
             return new DefaultDependencyComposer(
-                new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
+                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
                     new Dictionary<Type, IServiceCompiler>
                     {
                         [typeof(TypedService)] = new TypedServiceCompiler()
@@ -40,7 +48,7 @@ namespace StraightInject.Core
             return new TypedComponentComposer(implementationType, dependencies);
         }
 
-        public IComponentComposer<IService,TComponent> FromInstance<TComponent>(TComponent instance)
+        public IComponentComposer<IService, TComponent> FromInstance<TComponent>(TComponent instance)
         {
             return new InstanceComponentComposer<TComponent>(dependencies, instance);
         }
@@ -49,10 +57,5 @@ namespace StraightInject.Core
         {
             return compiler.CompileDependencies(dependencies);
         }
-    }
-
-    internal interface IContainerInitialState
-    {
-
     }
 }

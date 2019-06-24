@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,16 +9,19 @@ using StraightInject.Core.Debugging;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Services;
 
-namespace StraightInject.Core
+namespace StraightInject.Core.Compilers
 {
-    internal class DynamicAssemblyContainerCompiler : IContainerCompiler
+    /// <summary>
+    /// Gives a skeleton of container without resolve method body implementation
+    /// </summary>
+    internal abstract class DynamicAssemblyContainerCompilerBase : IContainerCompiler
     {
         private readonly Dictionary<Type, IServiceCompiler> dependencyConstructors;
 
         private readonly ModuleBuilder dynamicModule;
         private readonly AssemblyBuilder assembly;
 
-        public DynamicAssemblyContainerCompiler(Dictionary<Type, IServiceCompiler> dependencyConstructors)
+        protected DynamicAssemblyContainerCompilerBase(Dictionary<Type, IServiceCompiler> dependencyConstructors)
         {
             this.dependencyConstructors = dependencyConstructors;
             var assemblyName =
@@ -58,49 +59,16 @@ namespace StraightInject.Core
 
             foreach (var (key, value) in dependencies)
             {
-                var action = dependencyConstructors[value.GetType()].Construct(flatContainer, value, knownTypes, dependencies);
+                var action = dependencyConstructors[value.GetType()].Compile(flatContainer, value, knownTypes, dependencies);
                 knownTypes.Add(key, action);
             }
 
             return knownTypes;
         }
 
-        protected virtual void AppendResolveMethodBody(ILGenerator body,
+        protected abstract void AppendResolveMethodBody(ILGenerator body,
             Type genericParameter,
-            Dictionary<Type, Action<ILGenerator>> knownTypes)
-        {
-            var getType = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
-            var equalityOperator = typeof(Type).GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static);
-
-            var nextIf = body.DefineLabel();
-            foreach (var knownType in knownTypes)
-            {
-                body.MarkLabel(nextIf);
-                nextIf = body.DefineLabel();
-
-                body.Emit(OpCodes.Ldtoken, genericParameter);
-                body.Emit(OpCodes.Call, getType);
-                body.Emit(OpCodes.Ldtoken, knownType.Key);
-                body.Emit(OpCodes.Call, getType);
-                body.Emit(OpCodes.Call, equalityOperator);
-                body.Emit(OpCodes.Brfalse_S, nextIf);
-
-                knownType.Value(body);
-
-                body.Emit(OpCodes.Unbox_Any, genericParameter);
-                body.Emit(OpCodes.Ret);
-            }
-
-            body.MarkLabel(nextIf);
-
-            body.Emit(OpCodes.Ldstr, "There is no provider for your service");
-            var defaultConstructor = typeof(InvalidOperationException).GetConstructor(new[]
-            {
-                typeof(string)
-            });
-            body.Emit(OpCodes.Newobj, defaultConstructor);
-            body.Emit(OpCodes.Throw);
-        }
+            Dictionary<Type, Action<ILGenerator>> knownTypes);
 
         private MethodBuilder AppendResolveMethod(TypeBuilder flatContainer,
             Dictionary<Type, Action<ILGenerator>> knownTypes)

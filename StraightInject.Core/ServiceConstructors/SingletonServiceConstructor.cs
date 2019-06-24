@@ -7,9 +7,12 @@ using StraightInject.Services;
 
 namespace StraightInject.Core.ServiceConstructors
 {
+    /// <summary>
+    /// Provide a compilation for Instance specified service
+    /// </summary>
     internal class InstanceServiceCompiler : IServiceCompiler
     {
-        public Action<ILGenerator> Construct(Type flatContainer, IService service,
+        public Action<ILGenerator> Compile(Type flatContainer, IService service,
             Dictionary<Type, Action<ILGenerator>> knownTypes, Dictionary<Type, IService> dependencies)
         {
             if (knownTypes.ContainsKey(service.ServiceType))
@@ -28,20 +31,25 @@ namespace StraightInject.Core.ServiceConstructors
 
             void ReturnInstance(ILGenerator generator)
             {
-                
+                throw new NotImplementedException();
             }
 
             return ReturnInstance;
         }
     }
 
+    /// <summary>
+    /// Provide a compilation for singleton service (instance is not created yet)
+    /// </summary>
     internal class SingletonServiceCompiler : TypedServiceCompiler
     {
-        public override Action<ILGenerator> Construct(Type flatContainer, IService service,
+        public override Action<ILGenerator> Compile(Type flatContainer, IService service,
             Dictionary<Type, Action<ILGenerator>> knownTypes, Dictionary<Type, IService> dependencies)
         {
-            var action = base.Construct(flatContainer, service, knownTypes, dependencies);
-            
+            var action = base.Compile(flatContainer, service, knownTypes, dependencies);
+
+            throw new NotImplementedException();
+
             return action;
         }
     }

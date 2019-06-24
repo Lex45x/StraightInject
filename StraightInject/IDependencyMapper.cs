@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using StraightInject.Services;
 
 namespace StraightInject
@@ -28,19 +26,5 @@ namespace StraightInject
         IContainer Compile();
     }
 
-    public interface IComponentComposer<out TService> where TService : IService
-    {
-        TService ToService<TServiceType>();
-        TService ToService(Type serviceType);
-    }
-
-    public interface IComponentComposer<out TService, TComponent> : IComponentComposer<TService>
-        where TService : IService
-    {
-    }
-
-    public interface IConstructorResolver
-    {
-        ConstructorInfo Resolve(Type component, Dictionary<Type, IService> dependencies);
-    }
+    
 }

@@ -6,6 +6,10 @@ using StraightInject.Services;
 
 namespace StraightInject.Core.ConstructorResolver
 {
+    /// <summary>
+    /// Provide a specific constructor via expression trees
+    /// </summary>
+    /// <typeparam name="TComponent"></typeparam>
     public class ExpressionConstructorResolver<TComponent> : IConstructorResolver
     {
         private readonly Expression<Func<TComponent>> expression;

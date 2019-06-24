@@ -5,6 +5,9 @@ using StraightInject.Services;
 
 namespace StraightInject.Core.Services
 {
+    /// <summary>
+    /// Represent a specific type service with closed by component
+    /// </summary>
     internal class TypedService : IConstructableService
     {
         private IConstructorResolver constructorResolver;

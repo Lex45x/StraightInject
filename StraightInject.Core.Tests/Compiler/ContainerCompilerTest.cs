@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using StraightInject.Core.Compilers;
 using StraightInject.Core.ConstructorResolver;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
@@ -18,7 +19,7 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void EmptyContainerCompilationTest()
         {
-            var compiler = new DynamicAssemblyTypeHandleJumpTableContainerCompiler(new Dictionary<Type, IServiceCompiler>());
+            var compiler = new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(new Dictionary<Type, IServiceCompiler>());
 
             var container = compiler.CompileDependencies(new Dictionary<Type, IService>());
 
@@ -32,7 +33,7 @@ namespace StraightInject.Core.Tests.Compiler
         {
             Environment.SetEnvironmentVariable("STRAIGHT_INJECT_ENABLE_DIAGNOSTIC", "true");
 
-            var compiler = new DynamicAssemblyTypeHandleJumpTableContainerCompiler(new Dictionary<Type, IServiceCompiler>
+            var compiler = new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(new Dictionary<Type, IServiceCompiler>
             {
                 [typeof(TypedService)] = new TypedServiceCompiler()
             });

@@ -5,6 +5,10 @@ using StraightInject.Services;
 
 namespace StraightInject.Core.ComponentComposers
 {
+    /// <summary>
+    /// Used to compose an instance-related component
+    /// </summary>
+    /// <typeparam name="TInstance"></typeparam>
     internal class InstanceComponentComposer<TInstance> : IComponentComposer<IService, TInstance>
     {
         private readonly Dictionary<Type, IService> dependencies;

@@ -9,9 +9,12 @@ using StraightInject.Services;
 
 namespace StraightInject.Core.ServiceConstructors
 {
+    /// <summary>
+    /// Compile a service of a specific type
+    /// </summary>
     internal class TypedServiceCompiler : IServiceCompiler
     {
-        public virtual Action<ILGenerator> Construct(Type flatContainer, IService service,
+        public virtual Action<ILGenerator> Compile(Type flatContainer, IService service,
             Dictionary<Type, Action<ILGenerator>> knownTypes,
             Dictionary<Type, IService> dependencies)
         {

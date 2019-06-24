@@ -6,6 +6,10 @@ using StraightInject.Services;
 
 namespace StraightInject.Core.ComponentComposers
 {
+    /// <summary>
+    /// Used to compose a specific type component
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     internal class TypedComponentComposer<T> : IComponentComposer<IConstructableService, T>
     {
         private readonly Dictionary<Type, IService> dependencies;

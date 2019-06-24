@@ -6,6 +6,9 @@ using StraightInject.Services;
 
 namespace StraightInject.Core.ConstructorResolver
 {
+    /// <summary>
+    /// Try to resolve a constructor with all presented params from most parameters descends to least.
+    /// </summary>
     public class EagerConstructorResolver : IConstructorResolver
     {
         public ConstructorInfo Resolve(Type component, Dictionary<Type, IService> dependencies)

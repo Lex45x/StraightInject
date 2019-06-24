@@ -10,6 +10,7 @@ using Autofac;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using NUnit.Framework;
+using StraightInject.Core.Compilers;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
 using StraightInject.Core.Tests.Services;
@@ -64,7 +65,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
         public DependentServiceResolutionBenchmarks()
         {
             var mapperV1 = new DefaultDependencyComposer(
-                new DynamicAssemblyContainerCompiler(
+                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
                     new Dictionary<Type, IServiceCompiler>
                     {
                         [typeof(TypedService)] = new TypedServiceCompiler()
@@ -74,7 +75,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
             conceptContainerV1 = mapperV1.Compile();
 
             var mapperV2 = new DefaultDependencyComposer(
-                new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
+                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
                     new Dictionary<Type, IServiceCompiler>
                     {
                         [typeof(TypedService)] = new TypedServiceCompiler()
@@ -84,7 +85,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
             conceptContainerV2 = mapperV2.Compile();
 
             var mapperV3 = new DefaultDependencyComposer(
-                new DynamicAssemblyTypeHandleJumpTableContainerCompiler(
+                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
                     new Dictionary<Type, IServiceCompiler>
                     {
                         [typeof(TypedService)] = new TypedServiceCompiler()

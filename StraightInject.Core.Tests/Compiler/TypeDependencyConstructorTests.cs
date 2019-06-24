@@ -25,7 +25,7 @@ namespace StraightInject.Core.Tests.Compiler
             var serviceMock = Mock.Of<IService>(service => service.ServiceType == GetType());
 
             Assert.Throws<InvalidOperationException>(
-                () => constructor.Construct(null, serviceMock, knownTypes, dependencies));
+                () => constructor.Compile(null, serviceMock, knownTypes, dependencies));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace StraightInject.Core.Tests.Compiler
             };
 
             Assert.Throws<InvalidOperationException>(() =>
-                constructor.Construct(null, typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies));
+                constructor.Compile(null, typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies));
         }
 
         [Test]
@@ -57,7 +57,7 @@ namespace StraightInject.Core.Tests.Compiler
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            var action = constructor.Construct(null, typeDependency, knownTypes, dependencies);
+            var action = constructor.Compile(null, typeDependency, knownTypes, dependencies);
 
             Assert.IsNotNull(action);
 
@@ -83,10 +83,10 @@ namespace StraightInject.Core.Tests.Compiler
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            var construct = constructor.Construct(null, typedService, knownTypes, dependencies);
+            var construct = constructor.Compile(null, typedService, knownTypes, dependencies);
             knownTypes.Add(typedService.ServiceType, construct);
 
-            var action = constructor.Construct(null, dependency,
+            var action = constructor.Compile(null, dependency,
                 knownTypes,
                 dependencies);
 

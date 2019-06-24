@@ -6,11 +6,11 @@ using System.Reflection.Emit;
 using StraightInject.Core.Debugging;
 using StraightInject.Core.ServiceConstructors;
 
-namespace StraightInject.Core
+namespace StraightInject.Core.Compilers
 {
-    internal class DynamicAssemblyTypeHandleJumpTableContainerCompiler : DynamicAssemblyContainerCompiler
+    internal class DynamicAssemblyJumpTableOfTypeHandleContainerCompiler : DynamicAssemblyContainerCompilerBase
     {
-        public DynamicAssemblyTypeHandleJumpTableContainerCompiler(
+        public DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
             Dictionary<Type, IServiceCompiler> dependencyConstructors) : base(dependencyConstructors)
         {
         }
