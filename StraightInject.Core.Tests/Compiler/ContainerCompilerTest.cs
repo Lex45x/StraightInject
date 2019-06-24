@@ -23,7 +23,7 @@ namespace StraightInject.Core.Tests.Compiler
             var container = compiler.CompileDependencies(new Dictionary<Type, IService>());
 
             Assert.IsNotNull(container);
-            Assert.Throws<NotImplementedException>(() => container.Resolve<object>());
+            Assert.Throws<InvalidOperationException>(() => container.Resolve<object>());
         }
 
 
@@ -55,7 +55,7 @@ namespace StraightInject.Core.Tests.Compiler
             var container = compiler.CompileDependencies(dependencies);
 
             Assert.IsNotNull(container);
-            Assert.Throws<NotImplementedException>(() => container.Resolve<object>());
+            Assert.Throws<InvalidOperationException>(() => container.Resolve<object>());
 
             Assert.DoesNotThrow(() => container.Resolve<IDependentService>());
             Assert.DoesNotThrow(() => container.Resolve<IDependencyService>());

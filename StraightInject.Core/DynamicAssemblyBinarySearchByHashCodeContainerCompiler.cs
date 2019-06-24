@@ -35,7 +35,7 @@ namespace StraightInject.Core
 
             body.MarkLabel(exceptionLabel);
             body.Emit(OpCodes.Ldstr, "There is no provider for your service");
-            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new[]
+            var defaultConstructor = typeof(InvalidOperationException).GetConstructor(new[]
             {
                 typeof(string)
             });

@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using DynamicContainer;
 using Lokad.ILPack;
 using StraightInject.Core.Debugging;
 using StraightInject.Core.ServiceConstructors;
@@ -95,7 +94,7 @@ namespace StraightInject.Core
             body.MarkLabel(nextIf);
 
             body.Emit(OpCodes.Ldstr, "There is no provider for your service");
-            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new[]
+            var defaultConstructor = typeof(InvalidOperationException).GetConstructor(new[]
             {
                 typeof(string)
             });

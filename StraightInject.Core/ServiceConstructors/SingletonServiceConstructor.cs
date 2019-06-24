@@ -28,7 +28,7 @@ namespace StraightInject.Core.ServiceConstructors
 
             void ReturnInstance(ILGenerator generator)
             {
-                generator.Emit();
+                
             }
 
             return ReturnInstance;

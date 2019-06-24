@@ -10,7 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StraightInject.FakeAssembly.Container\StraightInject.FakeAssembly.Container.csproj" />
     <ProjectReference Include="..\StraightInject\StraightInject.csproj" />
   </ItemGroup>
 

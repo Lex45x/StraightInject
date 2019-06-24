@@ -31,7 +31,7 @@ namespace StraightInject.Core.ConstructorResolver
                 }
             }
 
-            throw new NotImplementedException(
+            throw new InvalidOperationException(
                 $"Couldn't find a constructor that will fit to registered services");
         }
     }

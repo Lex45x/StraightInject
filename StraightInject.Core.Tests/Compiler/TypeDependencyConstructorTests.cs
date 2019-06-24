@@ -40,7 +40,7 @@ namespace StraightInject.Core.Tests.Compiler
                 [typeof(DependentService)] = typeDependency
             };
 
-            Assert.Throws<NotImplementedException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
                 constructor.Construct(null, typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies));
         }
 

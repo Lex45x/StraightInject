@@ -19,7 +19,7 @@ namespace StraightInject.Core.ConstructorResolver
         {
             if (!(expression.Body is NewExpression expressionBody))
             {
-                throw new NotImplementedException("Expression body must be a constructor call");
+                throw new InvalidOperationException("Expression body must be a constructor call");
             }
 
             var constructor = expressionBody.Constructor;
@@ -27,7 +27,7 @@ namespace StraightInject.Core.ConstructorResolver
             {
                 if (!dependencies.ContainsKey(parameter.ParameterType))
                 {
-                    throw new NotImplementedException(
+                    throw new InvalidOperationException(
                         $"Can't resolve parameter {parameter.ParameterType.FullName} for selected constructor of {component}");
                 }
             }

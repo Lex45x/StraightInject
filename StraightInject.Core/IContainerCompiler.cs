@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DynamicContainer;
 using StraightInject.Services;
 
 namespace StraightInject.Core
