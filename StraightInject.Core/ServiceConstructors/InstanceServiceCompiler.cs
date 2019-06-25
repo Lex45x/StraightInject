@@ -29,10 +29,10 @@ namespace StraightInject.Core.ServiceConstructors
                     $"Invalid TypedServiceCompiler usage on Non-TypedService. Original service: {service.GetType().FullName}");
             }
 
-            initialState.ServiceInstances.Add(instanceService.ServiceType, instanceService.Instance);
+            initialState.ComponentInstances.Add(instanceService.Instance.GetType(), instanceService.Instance);
 
             var getMethod = typeof(IContainerInitialState)
-                .GetProperty("ServiceInstances", BindingFlags.Public | BindingFlags.Instance).GetMethod;
+                .GetProperty("ComponentInstances", BindingFlags.Public | BindingFlags.Instance).GetMethod;
 
             var indexer = typeof(Dictionary<Type, object>).GetProperties().First(x => x.GetIndexParameters().Length > 0)
                 .GetMethod;
@@ -44,7 +44,7 @@ namespace StraightInject.Core.ServiceConstructors
 
                 generator.Emit(OpCodes.Callvirt, getMethod);
 
-                generator.Emit(OpCodes.Ldtoken, instanceService.ServiceType);
+                generator.Emit(OpCodes.Ldtoken, instanceService.Instance.GetType());
                 generator.Emit(OpCodes.Callvirt, indexer);
             }
 

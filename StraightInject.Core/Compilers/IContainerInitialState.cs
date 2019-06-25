@@ -11,6 +11,6 @@ namespace StraightInject.Core.Compilers
         /// <summary>
         /// Held an instances of singleton service
         /// </summary>
-        Dictionary<Type, object> ServiceInstances { get; }
+        Dictionary<Type, object> ComponentInstances { get; }
     }
 }

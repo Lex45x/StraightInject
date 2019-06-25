@@ -150,7 +150,7 @@ namespace StraightInject.Core.Compilers
 
         private class ContainerInitialState : IContainerInitialState
         {
-            public Dictionary<Type, object> ServiceInstances { get; } = new Dictionary<Type, object>();
+            public Dictionary<Type, object> ComponentInstances { get; } = new Dictionary<Type, object>();
         }
     }
 }
