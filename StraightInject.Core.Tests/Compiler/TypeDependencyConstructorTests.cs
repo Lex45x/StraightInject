@@ -45,23 +45,58 @@ namespace StraightInject.Core.Tests.Compiler
         }
 
         [Test]
-        public void DependencyWithDefaultConstructorTest()
+        public void DependencyWithEagerConstructorTest()
         {
-            var constructor = new TypedServiceCompiler();
+            var compiler = new TypedServiceCompiler();
 
-            var typeDependency = new TypedService(GetType(), new EagerConstructorResolver(), GetType());
+            var typeDependency = new TypedService(typeof(MultiConstructorService), new EagerConstructorResolver(),
+                typeof(MultiConstructorService));
+            var plainServiceDependency = new TypedService(typeof(PlainService), new EagerConstructorResolver(),
+                typeof(IPlainService));
+
             var dependencies = new Dictionary<Type, IService>
             {
-                [GetType()] = typeDependency
+                [typeof(MultiConstructorService)] = typeDependency,
+                [typeof(IPlainService)] = plainServiceDependency
             };
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            var action = constructor.Compile(null, typeDependency, knownTypes, dependencies);
+            knownTypes.Add(typeof(IPlainService),
+                compiler.Compile(null, plainServiceDependency, knownTypes, dependencies));
+
+            var action = compiler.Compile(null, typeDependency, knownTypes, dependencies);
 
             Assert.IsNotNull(action);
 
-            AssertIlValidity(action, typeDependency.OriginalType);
+            var instance = AssertIlValidity<MultiConstructorService>(action);
+
+            Assert.IsNotNull(instance.Service);
+        }
+
+        [Test]
+        public void DependencyWithSpecifiedConstructorTest()
+        {
+            var compiler = new TypedServiceCompiler();
+
+            var typeDependency = new TypedService(typeof(MultiConstructorService),
+                new ExpressionConstructorResolver<MultiConstructorService>(() => new MultiConstructorService()),
+                typeof(MultiConstructorService));
+
+            var dependencies = new Dictionary<Type, IService>
+            {
+                [typeof(MultiConstructorService)] = typeDependency
+            };
+
+            var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
+
+            var action = compiler.Compile(null, typeDependency, knownTypes, dependencies);
+
+            Assert.IsNotNull(action);
+
+            var instance = AssertIlValidity<MultiConstructorService>(action);
+
+            Assert.IsNull(instance.Service);
         }
 
         [Test]
@@ -94,7 +129,7 @@ namespace StraightInject.Core.Tests.Compiler
             AssertIlValidity(action, dependency.OriginalType);
         }
 
-        private void AssertIlValidity(Action<ILGenerator> action, Type expectedInstanceType)
+        private object AssertIlValidity(Action<ILGenerator> action, Type expectedInstanceType)
         {
             var dynamicMethod = new DynamicMethod(Guid.NewGuid().ToString(), typeof(object), Type.EmptyTypes);
             var ilGenerator = dynamicMethod.GetILGenerator();
@@ -111,6 +146,13 @@ namespace StraightInject.Core.Tests.Compiler
 
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.GetType(), expectedInstanceType);
+
+            return instance;
+        }
+
+        private T AssertIlValidity<T>(Action<ILGenerator> action) where T : class
+        {
+            return AssertIlValidity(action, typeof(T)) as T;
         }
     }
 }
