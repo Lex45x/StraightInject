@@ -4,13 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using StraightInject.Core.Debugging;
+using StraightInject.Core.ServiceConstructors;
 
-namespace StraightInject.Core
+namespace StraightInject.Core.Compilers
 {
-    internal class DynamicAssemblyTypeHandleJumpTableContainerCompiler : DynamicAssemblyContainerCompiler
+    internal class DynamicAssemblyJumpTableOfTypeHandleContainerCompiler : DynamicAssemblyContainerCompilerBase
     {
-        public DynamicAssemblyTypeHandleJumpTableContainerCompiler(
-            Dictionary<Type, IDependencyConstructor> dependencyConstructors) : base(dependencyConstructors)
+        public DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
+            Dictionary<Type, IServiceCompiler> dependencyConstructors) : base(dependencyConstructors)
         {
         }
 
@@ -20,7 +21,7 @@ namespace StraightInject.Core
             if (!knownTypes.Any())
             {
                 body.Emit(OpCodes.Ldstr, "There is no provider for your service");
-                var ctor = typeof(NotImplementedException).GetConstructor(new[]
+                var ctor = typeof(InvalidOperationException).GetConstructor(new[]
                 {
                     typeof(string)
                 });
@@ -136,7 +137,7 @@ namespace StraightInject.Core
 
             body.MarkLabel(exceptionLabel);
             body.Emit(OpCodes.Ldstr, "There is no provider for your service");
-            var defaultConstructor = typeof(NotImplementedException).GetConstructor(new[]
+            var defaultConstructor = typeof(InvalidOperationException).GetConstructor(new[]
             {
                 typeof(string)
             });

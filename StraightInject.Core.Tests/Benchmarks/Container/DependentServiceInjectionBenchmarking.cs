@@ -10,6 +10,9 @@ using Autofac;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using NUnit.Framework;
+using StraightInject.Core.Compilers;
+using StraightInject.Core.ServiceConstructors;
+using StraightInject.Core.Services;
 using StraightInject.Core.Tests.Services;
 using StraightInject.Core.Tests.Services.EmptyServices;
 
@@ -62,30 +65,30 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
         public DependentServiceResolutionBenchmarks()
         {
             var mapperV1 = new DefaultDependencyComposer(
-                new DynamicAssemblyContainerCompiler(
-                    new Dictionary<Type, IDependencyConstructor>
+                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
+                    new Dictionary<Type, IServiceCompiler>
                     {
-                        [typeof(TypeDependency)] = new TypeDependencyConstructor()
+                        [typeof(TypedService)] = new TypedServiceCompiler()
                     }));
 
             AddRegistrations(mapperV1);
             conceptContainerV1 = mapperV1.Compile();
 
             var mapperV2 = new DefaultDependencyComposer(
-                new DynamicAssemblyBinarySearchByHashCodeContainerCompiler(
-                    new Dictionary<Type, IDependencyConstructor>
+                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
+                    new Dictionary<Type, IServiceCompiler>
                     {
-                        [typeof(TypeDependency)] = new TypeDependencyConstructor()
+                        [typeof(TypedService)] = new TypedServiceCompiler()
                     }));
 
             AddRegistrations(mapperV2);
             conceptContainerV2 = mapperV2.Compile();
 
             var mapperV3 = new DefaultDependencyComposer(
-                new DynamicAssemblyTypeHandleJumpTableContainerCompiler(
-                    new Dictionary<Type, IDependencyConstructor>
+                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
+                    new Dictionary<Type, IServiceCompiler>
                     {
-                        [typeof(TypeDependency)] = new TypeDependencyConstructor()
+                        [typeof(TypedService)] = new TypedServiceCompiler()
                     }));
 
             AddRegistrations(mapperV3);

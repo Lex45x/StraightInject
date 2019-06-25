@@ -1,4 +1,5 @@
 ﻿using System;
+using StraightInject.Services;
 
 namespace StraightInject
 {
@@ -9,14 +10,14 @@ namespace StraightInject
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IComponentComposer<TComponent> FromType<TComponent>();
+        IComponentComposer<IConstructableService,TComponent> FromType<TComponent>();
 
         /// <summary>
         /// Same as <see cref="FromTyperomType{TComponent}"/> but with implicit type passing
         /// </summary>
         /// <param name="implementationType"></param>
         /// <returns></returns>
-        IComponentComposer FromType(Type implementationType);
+        IComponentComposer<IConstructableService> FromType(Type implementationType);
 
         /// <summary>
         /// Compile existing map to a Completed container
@@ -25,13 +26,5 @@ namespace StraightInject
         IContainer Compile();
     }
 
-    public interface IComponentComposer
-    {
-        void ToService<TService>();
-        void ToService(Type serviceType);
-    }
-
-    public interface IComponentComposer<TComponent> : IComponentComposer
-    {
-    }
+    
 }
