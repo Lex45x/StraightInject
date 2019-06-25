@@ -26,7 +26,8 @@ namespace StraightInject.Core
                 new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
                     new Dictionary<Type, IServiceCompiler>
                     {
-                        [typeof(TypedService)] = new TypedServiceCompiler()
+                        [typeof(TypedService)] = new TypedServiceCompiler(),
+                        [typeof(InstanceService)] = new InstanceServiceCompiler()
                     }));
         }
 

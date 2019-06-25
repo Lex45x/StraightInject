@@ -14,7 +14,7 @@ using StraightInject.Services;
 namespace StraightInject.Core.Tests.Compiler
 {
     [TestFixture]
-    public class TypeDependencyConstructorTests
+    public class TypedServiceCompilerTests: ServiceCompilerTestBase
     {
         [Test]
         public void InvalidDependencyTypeTest()
@@ -25,7 +25,7 @@ namespace StraightInject.Core.Tests.Compiler
             var serviceMock = Mock.Of<IService>(service => service.ServiceType == GetType());
 
             Assert.Throws<InvalidOperationException>(
-                () => constructor.Compile(null, serviceMock, knownTypes, dependencies));
+                () => constructor.Compile(null, serviceMock, knownTypes, dependencies, null, null));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace StraightInject.Core.Tests.Compiler
             };
 
             Assert.Throws<InvalidOperationException>(() =>
-                constructor.Compile(null, typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies));
+                constructor.Compile(null, typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies, null, null));
         }
 
         [Test]
@@ -63,9 +63,9 @@ namespace StraightInject.Core.Tests.Compiler
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
             knownTypes.Add(typeof(IPlainService),
-                compiler.Compile(null, plainServiceDependency, knownTypes, dependencies));
+                compiler.Compile(null, plainServiceDependency, knownTypes, dependencies, null, null));
 
-            var action = compiler.Compile(null, typeDependency, knownTypes, dependencies);
+            var action = compiler.Compile(null, typeDependency, knownTypes, dependencies, null, null);
 
             Assert.IsNotNull(action);
 
@@ -90,7 +90,7 @@ namespace StraightInject.Core.Tests.Compiler
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            var action = compiler.Compile(null, typeDependency, knownTypes, dependencies);
+            var action = compiler.Compile(null, typeDependency, knownTypes, dependencies, null, null);
 
             Assert.IsNotNull(action);
 
@@ -118,41 +118,17 @@ namespace StraightInject.Core.Tests.Compiler
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            var construct = constructor.Compile(null, typedService, knownTypes, dependencies);
+            var construct = constructor.Compile(null, typedService, knownTypes, dependencies, null, null);
             knownTypes.Add(typedService.ServiceType, construct);
 
             var action = constructor.Compile(null, dependency,
                 knownTypes,
-                dependencies);
+                dependencies, null, null);
 
             Assert.IsNotNull(action);
             AssertIlValidity(action, dependency.OriginalType);
         }
 
-        private object AssertIlValidity(Action<ILGenerator> action, Type expectedInstanceType)
-        {
-            var dynamicMethod = new DynamicMethod(Guid.NewGuid().ToString(), typeof(object), Type.EmptyTypes);
-            var ilGenerator = dynamicMethod.GetILGenerator();
-
-            action(ilGenerator);
-
-            ilGenerator.Emit(OpCodes.Ret);
-
-            var @delegate = dynamicMethod.CreateDelegate(typeof(Func<object>)) as Func<object>;
-
-            Assert.IsNotNull(@delegate);
-
-            var instance = @delegate();
-
-            Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.GetType(), expectedInstanceType);
-
-            return instance;
-        }
-
-        private T AssertIlValidity<T>(Action<ILGenerator> action) where T : class
-        {
-            return AssertIlValidity(action, typeof(T)) as T;
-        }
+        
     }
 }
