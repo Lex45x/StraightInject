@@ -27,7 +27,8 @@ namespace StraightInject.Core
                     new Dictionary<Type, IServiceCompiler>
                     {
                         [typeof(TypedService)] = new TypedServiceCompiler(),
-                        [typeof(InstanceService)] = new InstanceServiceCompiler()
+                        [typeof(InstanceService)] = new InstanceServiceCompiler(),
+                        [typeof(SingletonService)] = new SingletonServiceCompiler()
                     }));
         }
 
@@ -37,14 +38,14 @@ namespace StraightInject.Core
             dependencies = new Dictionary<Type, IService>();
         }
 
-        public IComponentComposer<IConstructableService, TComponent> FromType<TComponent>()
+        public ITypedComponentComposer<IConstructableService, TComponent> FromType<TComponent>()
         {
             var wrapper = new TypedComponentComposer<TComponent>(dependencies);
 
             return wrapper;
         }
 
-        public IComponentComposer<IConstructableService> FromType(Type implementationType)
+        public ITypedComponentComposer<IConstructableService> FromType(Type implementationType)
         {
             return new TypedComponentComposer(implementationType, dependencies);
         }

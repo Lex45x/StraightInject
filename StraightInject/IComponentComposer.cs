@@ -13,6 +13,7 @@ namespace StraightInject
         TService ToService(Type serviceType);
     }
 
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
