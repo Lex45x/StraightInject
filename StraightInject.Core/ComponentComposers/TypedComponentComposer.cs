@@ -26,7 +26,6 @@ namespace StraightInject.Core.ComponentComposers
                 typedService);
 
             return typedService;
-            ;
         }
 
         public IConstructableService ToService(Type serviceType)

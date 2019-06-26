@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 using Lokad.ILPack;
 using StraightInject.Core.Debugging;
 using StraightInject.Core.ServiceConstructors;
@@ -27,6 +28,7 @@ namespace StraightInject.Core.Compilers
             var assemblyName =
                 new AssemblyName(
                     "DynamicContainer");
+
             assembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             dynamicModule =
                 assembly.DefineDynamicModule(
@@ -36,43 +38,59 @@ namespace StraightInject.Core.Compilers
         public IContainer CompileDependencies(Dictionary<Type, IService> dependencies)
         {
             var flatContainer = GenerateFlatContainer();
-            
+
             var knownTypes = GenerateIlAppenders(flatContainer, dependencies);
             var resolveMethod = AppendResolveMethod(flatContainer, knownTypes);
 
             var type = flatContainer.CreateTypeInfo();
 
-            if (DebugMode.Enabled())
+            DebugMode.Execute(() =>
             {
                 var assemblyGenerator = new AssemblyGenerator();
                 var combine = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                Console.WriteLine($"StraightInject generated assembly :: {combine}");
+                Console.WriteLine("[{0}] StraightInject generated assembly :: {1}", GetType().Name, combine);
                 assemblyGenerator.GenerateAssembly(assembly, combine);
-            }
+            });
 
             return Activator.CreateInstance(type) as IContainer;
         }
 
-        private Dictionary<Type, Action<ILGenerator>> GenerateIlAppenders(Type flatContainer, Dictionary<Type, IService> dependencies)
+        private Dictionary<Type, Action<ILGenerator>> GenerateIlAppenders(Type flatContainer,
+            Dictionary<Type, IService> dependencies)
         {
+            DebugMode.Execute(() =>
+            {
+                Console.WriteLine("[{0}] Starting IL generators creation for dependencies: ", GetType().Name);
+            });
+
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
             foreach (var (key, value) in dependencies)
             {
-                var action = dependencyConstructors[value.GetType()].Compile(flatContainer, value, knownTypes, dependencies);
+                Console.WriteLine("[{0}] Compiling ServiceType {1}", GetType().Name,
+                    key.FullName);
+                var action = dependencyConstructors[value.GetType()]
+                    .Compile(flatContainer, value, knownTypes, dependencies);
                 knownTypes.Add(key, action);
             }
+
+            DebugMode.Execute(() =>
+            {
+                Console.WriteLine("[{0}] Finished IL generators creation for each dependency", GetType().Name);
+            });
 
             return knownTypes;
         }
 
-        protected abstract void AppendResolveMethodBody(ILGenerator body,
+        protected abstract void BuildResolveMethodBody(ILGenerator body,
             Type genericParameter,
             Dictionary<Type, Action<ILGenerator>> knownTypes);
 
         private MethodBuilder AppendResolveMethod(TypeBuilder flatContainer,
             Dictionary<Type, Action<ILGenerator>> knownTypes)
         {
+            DebugMode.Execute(() => { Console.WriteLine("[{0}] Appending Resolve method", GetType().Name); });
+
             var resolveMethod = typeof(IContainer).GetMethod("Resolve",
                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
@@ -90,11 +108,14 @@ namespace StraightInject.Core.Compilers
             var serviceTypeParameter = genericParameters.First();
             var ilGenerator = methodBuilder.GetILGenerator();
 
-            AppendResolveMethodBody(ilGenerator, serviceTypeParameter, knownTypes);
+            BuildResolveMethodBody(ilGenerator, serviceTypeParameter, knownTypes);
 
             flatContainer.DefineMethodOverride(methodBuilder, resolveMethod);
 
             methodBuilder.SetImplementationFlags(MethodImplAttributes.AggressiveInlining);
+
+            DebugMode.Execute(
+                () => { Console.WriteLine("[{0}] Finished appending of Resolve method", GetType().Name); });
 
             return methodBuilder;
         }
@@ -116,6 +137,11 @@ namespace StraightInject.Core.Compilers
                 });
 
             DefineDefaultConstructor(typeBuilder);
+
+            DebugMode.Execute(() =>
+            {
+                Console.WriteLine("[{0}] Genearated Flat Container Type and his .ctor", GetType().Name);
+            });
 
             return typeBuilder;
         }
@@ -142,6 +168,7 @@ namespace StraightInject.Core.Compilers
             }
 
             ilGenerator.Emit(OpCodes.Call, constructor);
+
             ilGenerator.Emit(OpCodes.Ret);
         }
     }

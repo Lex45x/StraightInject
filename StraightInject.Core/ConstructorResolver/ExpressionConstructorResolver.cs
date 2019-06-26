@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using StraightInject.Core.Debugging;
 using StraightInject.Services;
 
 namespace StraightInject.Core.ConstructorResolver

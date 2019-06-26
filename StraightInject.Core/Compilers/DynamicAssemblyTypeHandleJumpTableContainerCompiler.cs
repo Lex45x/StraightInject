@@ -15,9 +15,11 @@ namespace StraightInject.Core.Compilers
         {
         }
 
-        protected override void AppendResolveMethodBody(ILGenerator body, Type genericParameter,
+        protected override void BuildResolveMethodBody(ILGenerator body, Type genericParameter,
             Dictionary<Type, Action<ILGenerator>> knownTypes)
         {
+            DebugMode.Execute(() => { Console.WriteLine("[{0}] Starting build of Resolve method", GetType().Name); });
+
             if (!knownTypes.Any())
             {
                 body.Emit(OpCodes.Ldstr, "There is no provider for your service");
@@ -34,16 +36,7 @@ namespace StraightInject.Core.Compilers
             var startPointer = knownTypes.Keys.Min(type => type.TypeHandle.Value.ToInt64());
             var services = knownTypes.Keys.OrderBy(type => type.TypeHandle.Value.ToInt64())
                 .ToDictionary(type => (int) (type.TypeHandle.Value.ToInt64() - startPointer) >> 6);
-
-            if (DebugMode.Enabled())
-            {
-                Console.WriteLine("Pointers array :: ");
-                foreach (var servicesKey in services.Keys)
-                {
-                    Console.WriteLine(servicesKey);
-                }
-            }
-
+            
             var exceptionLabel = body.DefineLabel();
 
             var typeHandle = body.DeclareLocal(typeof(RuntimeTypeHandle));
@@ -83,6 +76,8 @@ namespace StraightInject.Core.Compilers
             var jumpLabels = new List<Label>();
             var jumpTable = new Dictionary<Type, Label>();
 
+            DebugMode.Execute(() => { Console.WriteLine("[{0}] Starting JumpTable composing", GetType().Name); });
+
             foreach (var key in services.Keys)
             {
                 var differential = key - lastKey;
@@ -103,7 +98,9 @@ namespace StraightInject.Core.Compilers
                     body.Emit(OpCodes.Switch, jumpLabels.ToArray());
 
                     body.Emit(OpCodes.Ldloc, typeHash);
+
                     body.Emit(OpCodes.Ldc_I4, key);
+
                     body.Emit(OpCodes.Sub);
                     body.Emit(OpCodes.Stloc, typeHash);
 
@@ -143,6 +140,19 @@ namespace StraightInject.Core.Compilers
             });
             body.Emit(OpCodes.Newobj, defaultConstructor);
             body.Emit(OpCodes.Throw);
+
+
+            DebugMode.Execute(() =>
+            {
+                Console.WriteLine("[{0}] JumpTable successfully built", GetType().Name);
+
+                foreach (var service in services)
+                {
+                    Console.WriteLine("[{0}] Type: {1} :: Shifted Ptr: {2} :: Original Ptr: {3}", GetType().Name,
+                        service.Value.FullName,
+                        service.Key, service.Value.TypeHandle.Value.ToInt64());
+                }
+            });
         }
     }
 }
