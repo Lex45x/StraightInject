@@ -6,6 +6,7 @@ using StraightInject.Core.Compilers;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
 using StraightInject.Core.Tests.Services;
+using StraightInject.Core.Tests.Services.MVC.Configuration;
 using StraightInject.Services;
 
 namespace StraightInject.Core.Tests.Compiler
@@ -22,17 +23,17 @@ namespace StraightInject.Core.Tests.Compiler
                 [typeof(InstanceService)] = compiler
             });
 
-            var instance = new PlainService();
-            var instanceService = new InstanceService(instance, typeof(IPlainService));
+            var instance = new CacheConfiguration();
+            var instanceService = new InstanceService(instance, typeof(ICacheConfiguration));
 
             var dependencies = new Dictionary<Type, IService>
             {
-                [typeof(IPlainService)] = instanceService
+                [typeof(ICacheConfiguration)] = instanceService
             };
 
             var container = stubCompiler.CompileDependencies(dependencies);
 
-            var plainService = container.Resolve<IPlainService>();
+            var plainService = container.Resolve<ICacheConfiguration>();
 
             Assert.IsNotNull(plainService);
             Assert.AreSame(plainService, instance);

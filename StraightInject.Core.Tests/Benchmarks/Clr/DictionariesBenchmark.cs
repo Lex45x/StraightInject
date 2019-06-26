@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 using StraightInject.Core.Tests.Services;
+using StraightInject.Core.Tests.Services.MVC.Configuration;
 
 namespace StraightInject.Core.Tests.Benchmarks.Clr
 {
@@ -20,7 +21,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Clr
             {
                 [typeof(object)] = () => new object(),
                 [typeof(string)] = () => string.Empty,
-                [typeof(PlainService)] = () => new PlainService(),
+                [typeof(CacheConfiguration)] = () => new CacheConfiguration(),
                 [typeof(int)] = () => int.MaxValue
             };
             sortedDictionary = new SortedDictionary<int, Func<object>>(dictionary.ToDictionary(pair => pair.Key.GetHashCode(),pair => pair.Value));
@@ -29,13 +30,13 @@ namespace StraightInject.Core.Tests.Benchmarks.Clr
         [Benchmark]
         public Func<object> GetFactoryFromDictionary()
         {
-            return dictionary[typeof(PlainService)];
+            return dictionary[typeof(CacheConfiguration)];
         }
 
         [Benchmark]
         public Func<object> GetFactoryFromSortedDictionary()
         {
-            return sortedDictionary[typeof(PlainService).GetHashCode()];
+            return sortedDictionary[typeof(CacheConfiguration).GetHashCode()];
         }
     }
 }

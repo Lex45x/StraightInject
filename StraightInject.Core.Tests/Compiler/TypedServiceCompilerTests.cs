@@ -9,12 +9,14 @@ using StraightInject.Core.ConstructorResolver;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
 using StraightInject.Core.Tests.Services;
+using StraightInject.Core.Tests.Services.MVC.Configuration;
+using StraightInject.Core.Tests.Services.MVC.DataAccess;
 using StraightInject.Services;
 
 namespace StraightInject.Core.Tests.Compiler
 {
     [TestFixture]
-    public class TypedServiceCompilerTests: ServiceCompilerTestBase
+    public class TypedServiceCompilerTests : ServiceCompilerTestBase
     {
         [Test]
         public void InvalidDependencyTypeTest()
@@ -33,15 +35,16 @@ namespace StraightInject.Core.Tests.Compiler
         {
             var constructor = new TypedServiceCompiler();
 
-            var typeDependency = new TypedService(typeof(DependentService), new EagerConstructorResolver(),
-                typeof(DependentService));
+            var typeDependency = new TypedService(typeof(UnitOfWork), new EagerConstructorResolver(),
+                typeof(UnitOfWork));
             var dependencies = new Dictionary<Type, IService>
             {
-                [typeof(DependentService)] = typeDependency
+                [typeof(UnitOfWork)] = typeDependency
             };
 
             Assert.Throws<InvalidOperationException>(() =>
-                constructor.Compile(null, typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies, null, null));
+                constructor.Compile(null, typeDependency, new Dictionary<Type, Action<ILGenerator>>(), dependencies,
+                    null, null));
         }
 
         [Test]
@@ -49,29 +52,29 @@ namespace StraightInject.Core.Tests.Compiler
         {
             var compiler = new TypedServiceCompiler();
 
-            var typeDependency = new TypedService(typeof(MultiConstructorService), new EagerConstructorResolver(),
-                typeof(MultiConstructorService));
-            var plainServiceDependency = new TypedService(typeof(PlainService), new EagerConstructorResolver(),
-                typeof(IPlainService));
+            var typeDependency = new TypedService(typeof(UnitOfWork), new EagerConstructorResolver(),
+                typeof(UnitOfWork));
+            var plainServiceDependency = new TypedService(typeof(DatabaseConfiguration), new EagerConstructorResolver(),
+                typeof(IDatabaseConfiguration));
 
             var dependencies = new Dictionary<Type, IService>
             {
-                [typeof(MultiConstructorService)] = typeDependency,
-                [typeof(IPlainService)] = plainServiceDependency
+                [typeof(UnitOfWork)] = typeDependency,
+                [typeof(IDatabaseConfiguration)] = plainServiceDependency
             };
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
-            knownTypes.Add(typeof(IPlainService),
+            knownTypes.Add(typeof(IDatabaseConfiguration),
                 compiler.Compile(null, plainServiceDependency, knownTypes, dependencies, null, null));
 
             var action = compiler.Compile(null, typeDependency, knownTypes, dependencies, null, null);
 
             Assert.IsNotNull(action);
 
-            var instance = AssertIlValidity<MultiConstructorService>(action);
+            var instance = AssertIlValidity<UnitOfWork>(action);
 
-            Assert.IsNotNull(instance.Service);
+            Assert.IsNotNull(instance.Configuration);
         }
 
         [Test]
@@ -79,13 +82,13 @@ namespace StraightInject.Core.Tests.Compiler
         {
             var compiler = new TypedServiceCompiler();
 
-            var typeDependency = new TypedService(typeof(MultiConstructorService),
-                new ExpressionConstructorResolver<MultiConstructorService>(() => new MultiConstructorService()),
-                typeof(MultiConstructorService));
+            var typeDependency = new TypedService(typeof(UnitOfWork),
+                new ExpressionConstructorResolver<UnitOfWork>(() => new UnitOfWork()),
+                typeof(UnitOfWork));
 
             var dependencies = new Dictionary<Type, IService>
             {
-                [typeof(MultiConstructorService)] = typeDependency
+                [typeof(UnitOfWork)] = typeDependency
             };
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
@@ -94,9 +97,9 @@ namespace StraightInject.Core.Tests.Compiler
 
             Assert.IsNotNull(action);
 
-            var instance = AssertIlValidity<MultiConstructorService>(action);
+            var instance = AssertIlValidity<UnitOfWork>(action);
 
-            Assert.IsNull(instance.Service);
+            Assert.IsNull(instance.Configuration);
         }
 
         [Test]
@@ -104,16 +107,16 @@ namespace StraightInject.Core.Tests.Compiler
         {
             var constructor = new TypedServiceCompiler();
 
-            var dependency = new TypedService(typeof(DependentService), new EagerConstructorResolver(),
-                typeof(DependentService));
+            var dependency = new TypedService(typeof(UnitOfWork), new EagerConstructorResolver(),
+                typeof(UnitOfWork));
 
-            var typedService = new TypedService(typeof(DependencyService), new EagerConstructorResolver(),
-                typeof(IDependencyService));
+            var typedService = new TypedService(typeof(DatabaseConfiguration), new EagerConstructorResolver(),
+                typeof(IDatabaseConfiguration));
 
             var dependencies = new Dictionary<Type, IService>
             {
-                [typeof(IDependencyService)] = typedService,
-                [typeof(DependentService)] = dependency
+                [typeof(IDatabaseConfiguration)] = typedService,
+                [typeof(UnitOfWork)] = dependency
             };
 
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
@@ -128,7 +131,5 @@ namespace StraightInject.Core.Tests.Compiler
             Assert.IsNotNull(action);
             AssertIlValidity(action, dependency.OriginalType);
         }
-
-        
     }
 }

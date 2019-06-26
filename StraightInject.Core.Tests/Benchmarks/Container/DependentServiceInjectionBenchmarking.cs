@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -15,6 +16,12 @@ using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
 using StraightInject.Core.Tests.Services;
 using StraightInject.Core.Tests.Services.EmptyServices;
+using StraightInject.Core.Tests.Services.MVC.BusinessLogic;
+using StraightInject.Core.Tests.Services.MVC.Configuration;
+using StraightInject.Core.Tests.Services.MVC.Controllers.Protected;
+using StraightInject.Core.Tests.Services.MVC.Controllers.Public;
+using StraightInject.Core.Tests.Services.MVC.DataAccess;
+using StraightInject.Core.Tests.Services.MVC.ThirdParty;
 
 namespace StraightInject.Core.Tests.Benchmarks.Container
 {
@@ -24,30 +31,31 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
     [MinColumn, MaxColumn, MeanColumn, MedianColumn, StdErrorColumn, StdDevColumn]
     public class DependentServiceResolutionBenchmarks
     {
-        private readonly IContainer conceptContainerV1;
+        private readonly IContainer straightInjectContainer;
 
         private readonly Autofac.IContainer autofacContainer;
 
         private readonly Abioc.IContainer abiocContainer;
-        private readonly IContainer conceptContainerV2;
 
         static DependentServiceResolutionBenchmarks()
         {
             Registrations = new Dictionary<Type, Type>
             {
-                [typeof(IPlainService)] = typeof(PlainService),
-                [typeof(IDependencyService)] = typeof(DependencyService),
-                [typeof(object)] = typeof(object),
-                [typeof(PlainService)] = typeof(PlainService),
-                [typeof(DependentService)] = typeof(DependentService),
-                [typeof(DependencyService)] = typeof(DependencyService),
-                [typeof(MultiInterfaceService)] = typeof(MultiInterfaceService),
-                [typeof(IMultiInterfaceService)] = typeof(MultiInterfaceService),
-                [typeof(IDisposable)] = typeof(MultiInterfaceService),
-                [typeof(IConvertible)] = typeof(MultiInterfaceService),
-                [typeof(IComparable)] = typeof(MultiInterfaceService),
-                [typeof(IFormattable)] = typeof(MultiInterfaceService),
-                [typeof(ICloneable)] = typeof(MultiInterfaceService)
+                [typeof(HttpClient)] = typeof(HttpClient),
+                [typeof(IUserActivityService)] = typeof(UserActivityService),
+                [typeof(IUserAuthorizationService)] = typeof(UserAuthorizationService),
+                [typeof(IUserService)] = typeof(UserService),
+                [typeof(ICacheConfiguration)] = typeof(CacheConfiguration),
+                [typeof(IDatabaseConfiguration)] = typeof(DatabaseConfiguration),
+                [typeof(IFacebookIntegrationConfiguration)] = typeof(FacebookIntegrationConfiguration),
+                [typeof(IGoogleIntegrationConfiguration)] = typeof(GoogleIntegrationConfiguration),
+                [typeof(UserActivityController)] = typeof(UserActivityController),
+                [typeof(UserDetailsController)] = typeof(UserDetailsController),
+                [typeof(IUserActivityRepository)] = typeof(UnitOfWork),
+                [typeof(IUserAuthorizationDetailsCache)] = typeof(UserAuthorizationDetailsCache),
+                [typeof(IUserRepository)] = typeof(UnitOfWork),
+                [typeof(IFacebookIntegrationService)] = typeof(FacebookIntegrationService),
+                [typeof(IGoogleIntegrationService)] = typeof(GoogleIntegrationService)
             };
 
             foreach (var service in Assembly.GetExecutingAssembly().ExportedTypes
@@ -56,11 +64,10 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
                 Registrations.Add(service, service);
             }
 
-            Registrations.Add(typeof(IDependentService), typeof(DependentService));
+            Registrations.Add(typeof(LoginController), typeof(LoginController));
         }
 
         private static readonly Dictionary<Type, Type> Registrations;
-        private readonly IContainer conceptContainerV3;
 
         public DependentServiceResolutionBenchmarks()
         {
@@ -72,27 +79,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
                     }));
 
             AddRegistrations(mapperV1);
-            conceptContainerV1 = mapperV1.Compile();
-
-            var mapperV2 = new DefaultDependencyComposer(
-                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
-                    new Dictionary<Type, IServiceCompiler>
-                    {
-                        [typeof(TypedService)] = new TypedServiceCompiler()
-                    }));
-
-            AddRegistrations(mapperV2);
-            conceptContainerV2 = mapperV2.Compile();
-
-            var mapperV3 = new DefaultDependencyComposer(
-                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
-                    new Dictionary<Type, IServiceCompiler>
-                    {
-                        [typeof(TypedService)] = new TypedServiceCompiler()
-                    }));
-
-            AddRegistrations(mapperV3);
-            conceptContainerV3 = mapperV3.Compile();
+            straightInjectContainer = mapperV1.Compile();
 
             var builder = new ContainerBuilder();
             AddRegistrations(builder);
@@ -100,14 +87,30 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
 
             var registrationSetup = new RegistrationSetup();
             AddRegistrations(registrationSetup);
-            abiocContainer = registrationSetup.Construct(Assembly.GetExecutingAssembly(), out var code);
+            abiocContainer =
+                registrationSetup.Construct(new[] {Assembly.GetExecutingAssembly(), typeof(HttpClient).Assembly},
+                    out var code);
         }
 
         private static void AddRegistrations(RegistrationSetup registrationSetup)
         {
             foreach (var (key, value) in Registrations)
             {
-                registrationSetup.Register(key, value);
+                //Abioc can work with classes that have single constructor only =/
+                if (value == typeof(HttpClient))
+                {
+                    registrationSetup.RegisterFactory(typeof(HttpClient), () => new HttpClient());
+                }
+
+                //things goes even worse if you have an hierarchy
+                if (value == typeof(UnitOfWork))
+                {
+                    registrationSetup.RegisterFactory(key, () => new UnitOfWork(new DatabaseConfiguration()));
+                }
+                else
+                {
+                    registrationSetup.Register(key, value);
+                }
             }
         }
 
@@ -134,39 +137,32 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
         }
 
         [Benchmark(Baseline = true)]
-        public IDependentService RawInstantiate()
+        public LoginController RawInstantiate()
         {
-            return new DependentService(new DependencyService());
+            return new LoginController(
+                new FacebookIntegrationService(new HttpClient(), new FacebookIntegrationConfiguration()),
+                new GoogleIntegrationService(new HttpClient(), new GoogleIntegrationConfiguration()),
+                new UserAuthorizationService(new UserAuthorizationDetailsCache(new CacheConfiguration()),
+                    new UnitOfWork(new DatabaseConfiguration())),
+                new UserService(new UnitOfWork(new DatabaseConfiguration())));
         }
 
         [Benchmark]
-        public IDependentService ConceptContainerV1Instantiate()
+        public LoginController StraightIbjectContainerInstantiate()
         {
-            return conceptContainerV1.Resolve<IDependentService>();
+            return straightInjectContainer.Resolve<LoginController>();
         }
 
         [Benchmark]
-        public IDependentService ConceptContainerV2Instantiate()
+        public LoginController AutofacContainerInstantiate()
         {
-            return conceptContainerV2.Resolve<IDependentService>();
+            return autofacContainer.Resolve<LoginController>();
         }
 
         [Benchmark]
-        public IDependentService ConceptContainerV3Instantiate()
+        public LoginController AbiocContainerInstantiate()
         {
-            return conceptContainerV3.Resolve<IDependentService>();
-        }
-
-        [Benchmark]
-        public IDependentService AutofacContainerInstantiate()
-        {
-            return autofacContainer.Resolve<IDependentService>();
-        }
-
-        [Benchmark]
-        public IDependentService AbiocContainerInstantiate()
-        {
-            return abiocContainer.GetService<IDependentService>();
+            return abiocContainer.GetService<LoginController>();
         }
     }
 }
