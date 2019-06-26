@@ -17,7 +17,8 @@ namespace StraightInject.Core.Compilers
     internal abstract class DynamicAssemblyContainerCompilerBase : IContainerCompiler
     {
         private readonly Dictionary<Type, IServiceCompiler> dependencyConstructors;
-
+        protected FieldInfo StateField;
+        protected IContainerInitialState InitialState;
         private readonly ModuleBuilder dynamicModule;
         private readonly AssemblyBuilder assembly;
 
@@ -35,8 +36,10 @@ namespace StraightInject.Core.Compilers
 
         public IContainer CompileDependencies(Dictionary<Type, IService> dependencies)
         {
+            InitialState = new ContainerInitialState();
+
             var flatContainer = GenerateFlatContainer();
-            
+
             var knownTypes = GenerateIlAppenders(flatContainer, dependencies);
             var resolveMethod = AppendResolveMethod(flatContainer, knownTypes);
 
@@ -50,16 +53,18 @@ namespace StraightInject.Core.Compilers
                 assemblyGenerator.GenerateAssembly(assembly, combine);
             }
 
-            return Activator.CreateInstance(type) as IContainer;
+            return Activator.CreateInstance(type, InitialState) as IContainer;
         }
 
-        private Dictionary<Type, Action<ILGenerator>> GenerateIlAppenders(Type flatContainer, Dictionary<Type, IService> dependencies)
+        private Dictionary<Type, Action<ILGenerator>> GenerateIlAppenders(Type flatContainer,
+            Dictionary<Type, IService> dependencies)
         {
             var knownTypes = new Dictionary<Type, Action<ILGenerator>>();
 
             foreach (var (key, value) in dependencies)
             {
-                var action = dependencyConstructors[value.GetType()].Compile(flatContainer, value, knownTypes, dependencies);
+                var action = dependencyConstructors[value.GetType()]
+                    .Compile(flatContainer, value, knownTypes, dependencies, InitialState, StateField);
                 knownTypes.Add(key, action);
             }
 
@@ -120,29 +125,32 @@ namespace StraightInject.Core.Compilers
             return typeBuilder;
         }
 
-        private static void DefineDefaultConstructor(TypeBuilder typeBuilder)
+        private void DefineDefaultConstructor(TypeBuilder typeBuilder)
         {
             var constructor = typeof(object).GetConstructors(BindingFlags.Public | BindingFlags.Instance)
                 .First();
-            var parameters = constructor.GetParameters();
-            var constructorParameters = parameters.Select(info => info.ParameterType).ToArray();
+
+            StateField = typeBuilder.DefineField("_state", typeof(IContainerInitialState), FieldAttributes.Private);
 
             var constructorBuilder = typeBuilder.DefineConstructor(
                 MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                 CallingConventions.Standard,
-                constructorParameters);
+                new[] {typeof(IContainerInitialState)});
 
             var ilGenerator = constructorBuilder.GetILGenerator();
 
             ilGenerator.Emit(OpCodes.Ldarg_0);
+            ilGenerator.Emit(OpCodes.Ldarg_1);
+            ilGenerator.Emit(OpCodes.Stfld, StateField);
 
-            for (var i = 1; i < parameters.Length; i++)
-            {
-                ilGenerator.Emit(OpCodes.Ldarg, i);
-            }
-
+            ilGenerator.Emit(OpCodes.Ldarg_0);
             ilGenerator.Emit(OpCodes.Call, constructor);
             ilGenerator.Emit(OpCodes.Ret);
+        }
+
+        private class ContainerInitialState : IContainerInitialState
+        {
+            public Dictionary<Type, object> ComponentInstances { get; } = new Dictionary<Type, object>();
         }
     }
 }

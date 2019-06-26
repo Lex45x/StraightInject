@@ -31,8 +31,6 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void ContainerCompilationTest()
         {
-            Environment.SetEnvironmentVariable("STRAIGHT_INJECT_ENABLE_DIAGNOSTIC", "true");
-
             var compiler = new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(new Dictionary<Type, IServiceCompiler>
             {
                 [typeof(TypedService)] = new TypedServiceCompiler()
