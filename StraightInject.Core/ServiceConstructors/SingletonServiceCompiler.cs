@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using StraightInject.Core.Compilers;
+using StraightInject.Core.Debugging;
 using StraightInject.Core.Services;
 using StraightInject.Services;
 
@@ -25,6 +26,7 @@ namespace StraightInject.Core.ServiceConstructors
             }
 
             var action = base.Compile(flatContainer, service, knownTypes, dependencies, initialState, stateField);
+
 
             var getMethod = typeof(IContainerInitialState)
                 .GetProperty("ComponentInstances", BindingFlags.Public | BindingFlags.Instance).GetMethod;
@@ -75,6 +77,10 @@ namespace StraightInject.Core.ServiceConstructors
                 generator.MarkLabel(finish);
             }
 
+            DebugMode.Execute(() =>
+            {
+                Console.WriteLine("[{0}] ILGenerator with getter for SingleInstance of type {1} successfully created", GetType().Name, service.ServiceType.FullName);
+            });
             return GeneratorAction;
         }
     }

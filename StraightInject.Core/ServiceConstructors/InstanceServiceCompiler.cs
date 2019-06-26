@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using StraightInject.Core.Compilers;
+using StraightInject.Core.Debugging;
 using StraightInject.Core.Services;
 using StraightInject.Services;
 
@@ -20,6 +21,10 @@ namespace StraightInject.Core.ServiceConstructors
         {
             if (knownTypes.ContainsKey(service.ServiceType))
             {
+                DebugMode.Execute(() =>
+                {
+                    Console.WriteLine("[{0}] Instance of type {1} already have compiled getter", GetType().Name, service.ServiceType.FullName);
+                });
                 return knownTypes[service.ServiceType];
             }
 
@@ -47,6 +52,11 @@ namespace StraightInject.Core.ServiceConstructors
                 generator.Emit(OpCodes.Ldtoken, instanceService.Instance.GetType());
                 generator.Emit(OpCodes.Callvirt, indexer);
             }
+
+            DebugMode.Execute(() =>
+            {
+                Console.WriteLine("[{0}] ILGenerator with getter for Instance of type {1} successfully created", GetType().Name, service.ServiceType.FullName);
+            });
 
             return ReturnInstance;
         }
