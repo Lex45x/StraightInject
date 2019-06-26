@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using StraightInject.Core.Debugging;
+using StraightInject.Core.Compilers;
 using StraightInject.Core.Services;
 using StraightInject.Services;
 
@@ -17,7 +18,7 @@ namespace StraightInject.Core.ServiceConstructors
     {
         public virtual Action<ILGenerator> Compile(Type flatContainer, IService service,
             Dictionary<Type, Action<ILGenerator>> knownTypes,
-            Dictionary<Type, IService> dependencies)
+            Dictionary<Type, IService> dependencies, IContainerInitialState initialState, FieldInfo stateField)
         {
             if (knownTypes.ContainsKey(service.ServiceType))
             {

@@ -10,7 +10,7 @@ namespace StraightInject.Core.ComponentComposers
     /// Used to compose a specific type component
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class TypedComponentComposer<T> : IComponentComposer<IConstructableService, T>
+    internal class TypedComponentComposer<T> : ITypedComponentComposer<IConstructableService, T>
     {
         private readonly Dictionary<Type, IService> dependencies;
 
@@ -35,9 +35,18 @@ namespace StraightInject.Core.ComponentComposers
 
             return typedService;
         }
+
+        public IComponentComposer<IConstructableService> SingleInstance()
+        {
+            return new SingleInstanceComponentComposer<T>(dependencies);
+        }
     }
 
-    internal class TypedComponentComposer : IComponentComposer<IConstructableService>
+
+    /// <summary>
+    /// Used to compose a specific type component
+    /// </summary>
+    internal class TypedComponentComposer : ITypedComponentComposer<IConstructableService>
     {
         private readonly Type componentType;
         private readonly Dictionary<Type, IService> dependencies;
@@ -62,6 +71,11 @@ namespace StraightInject.Core.ComponentComposers
             dependencies.Add(serviceType, typedService);
 
             return typedService;
+        }
+
+        public IComponentComposer<IConstructableService> SingleInstance()
+        {
+            return new SingleInstanceComponentComposer(componentType, dependencies);
         }
     }
 }
