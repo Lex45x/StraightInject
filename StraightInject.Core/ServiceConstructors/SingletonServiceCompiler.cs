@@ -32,14 +32,15 @@ namespace StraightInject.Core.ServiceConstructors
             var containsKey =
                 typeof(Dictionary<Type, object>).GetMethod("ContainsKey", BindingFlags.Public | BindingFlags.Instance);
 
-            var indexer = typeof(Dictionary<Type, object>).GetProperties().First(x => x.GetIndexParameters().Length > 0);
+            var indexer = typeof(Dictionary<Type, object>).GetProperties()
+                .First(x => x.GetIndexParameters().Length > 0);
 
             void GeneratorAction(ILGenerator generator)
             {
                 generator.Emit(OpCodes.Ldarg_0);
                 generator.Emit(OpCodes.Ldfld, stateField);
                 generator.Emit(OpCodes.Callvirt, getMethod);
-                
+
                 generator.Emit(OpCodes.Ldtoken, singletonService.OriginalType);
                 generator.Emit(OpCodes.Callvirt, containsKey);
 
@@ -75,30 +76,6 @@ namespace StraightInject.Core.ServiceConstructors
             }
 
             return GeneratorAction;
-        }
-
-    }
-
-
-    class container:IContainer
-    {
-        private readonly IContainerInitialState state;
-
-        public container(IContainerInitialState state)
-        {
-            this.state = state;
-        }
-        public T Resolve<T>()
-        {
-            if (state.ComponentInstances.ContainsKey(typeof(object)))
-            {
-                return (T) state.ComponentInstances[typeof(object)];
-            }
-            else
-            {
-                state.ComponentInstances[typeof(object)] = new object();
-                return (T)state.ComponentInstances[typeof(object)];
-            }
         }
     }
 }
