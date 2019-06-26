@@ -78,6 +78,7 @@ namespace StraightInject.Core.Compilers
             body.Emit(OpCodes.Ldc_I4_6);
             body.Emit(OpCodes.Shr);
             body.Emit(OpCodes.Stloc, typeHash);
+            body.Emit(OpCodes.Ldloc, typeHash);
 
             var lastKey = 0;
             var jumpLabels = new List<Label>();
@@ -99,28 +100,24 @@ namespace StraightInject.Core.Compilers
                 }
                 else
                 {
-                    body.Emit(OpCodes.Ldloc, typeHash);
                     body.Emit(OpCodes.Switch, jumpLabels.ToArray());
 
                     body.Emit(OpCodes.Ldloc, typeHash);
                     body.Emit(OpCodes.Ldc_I4, key);
                     body.Emit(OpCodes.Sub);
-                    body.Emit(OpCodes.Stloc, typeHash);
-
 
                     jumpLabels = new List<Label>
                     {
                         label
                     };
                 }
-
+                
                 jumpTable.Add(services[key], label);
                 lastKey = key;
             }
 
             if (jumpLabels.Any())
             {
-                body.Emit(OpCodes.Ldloc, typeHash);
                 body.Emit(OpCodes.Switch, jumpLabels.ToArray());
             }
 

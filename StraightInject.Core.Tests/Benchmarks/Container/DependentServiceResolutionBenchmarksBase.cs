@@ -9,7 +9,6 @@ using Abioc;
 using Abioc.Registration;
 using Autofac;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Running;
 using NUnit.Framework;
 using StraightInject.Core.Compilers;
 using StraightInject.Core.ServiceConstructors;
@@ -26,18 +25,17 @@ using StraightInject.Core.Tests.Services.MVC.ThirdParty;
 namespace StraightInject.Core.Tests.Benchmarks.Container
 {
     [TestFixture]
-    [SimpleJob(targetCount: 100)]
+    [SimpleJob(targetCount: 10)]
     [DisassemblyDiagnoser(printIL: true)]
     [MinColumn, MaxColumn, MeanColumn, MedianColumn, StdErrorColumn, StdDevColumn]
-    public class DependentServiceResolutionBenchmarks
+    public class DependentServiceResolutionBenchmarksBase
     {
-        private readonly IContainer straightInjectContainer;
+        protected IContainer straightInjectContainer;
+        protected Autofac.IContainer autofacContainer;
+        protected Abioc.IContainer abiocContainer;
+        private static Dictionary<Type, Type> Registrations;
 
-        private readonly Autofac.IContainer autofacContainer;
-
-        private readonly Abioc.IContainer abiocContainer;
-
-        static DependentServiceResolutionBenchmarks()
+        static DependentServiceResolutionBenchmarksBase()
         {
             Registrations = new Dictionary<Type, Type>
             {
@@ -67,16 +65,11 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
             Registrations.Add(typeof(LoginController), typeof(LoginController));
         }
 
-        private static readonly Dictionary<Type, Type> Registrations;
-
-        public DependentServiceResolutionBenchmarks()
+        [GlobalSetup]
+        [OneTimeSetUp]
+        public void Setup()
         {
-            var mapperV1 = new DefaultDependencyComposer(
-                new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
-                    new Dictionary<Type, IServiceCompiler>
-                    {
-                        [typeof(TypedService)] = new TypedServiceCompiler()
-                    }));
+            var mapperV1 = DefaultDependencyComposer.Initialize();
 
             AddRegistrations(mapperV1);
             straightInjectContainer = mapperV1.Compile();
@@ -92,7 +85,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
                     out var code);
         }
 
-        private static void AddRegistrations(RegistrationSetup registrationSetup)
+        protected virtual void AddRegistrations(RegistrationSetup registrationSetup)
         {
             foreach (var (key, value) in Registrations)
             {
@@ -114,7 +107,7 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
             }
         }
 
-        private static void AddRegistrations(ContainerBuilder builder)
+        protected virtual void AddRegistrations(ContainerBuilder builder)
         {
             foreach (var (key, value) in Registrations)
             {
@@ -122,47 +115,12 @@ namespace StraightInject.Core.Tests.Benchmarks.Container
             }
         }
 
-        private static void AddRegistrations(IDependencyMapper mapper)
+        protected virtual void AddRegistrations(IDependencyMapper mapper)
         {
             foreach (var (key, value) in Registrations)
             {
                 mapper.FromType(value).ToService(key);
             }
-        }
-
-        [Test]
-        public void MeasureDependentServiceResolutionBenchmarks()
-        {
-            var summary = BenchmarkRunner.Run<DependentServiceResolutionBenchmarks>();
-        }
-
-        [Benchmark(Baseline = true)]
-        public LoginController RawInstantiate()
-        {
-            return new LoginController(
-                new FacebookIntegrationService(new HttpClient(), new FacebookIntegrationConfiguration()),
-                new GoogleIntegrationService(new HttpClient(), new GoogleIntegrationConfiguration()),
-                new UserAuthorizationService(new UserAuthorizationDetailsCache(new CacheConfiguration()),
-                    new UnitOfWork(new DatabaseConfiguration())),
-                new UserService(new UnitOfWork(new DatabaseConfiguration())));
-        }
-
-        [Benchmark]
-        public LoginController StraightIbjectContainerInstantiate()
-        {
-            return straightInjectContainer.Resolve<LoginController>();
-        }
-
-        [Benchmark]
-        public LoginController AutofacContainerInstantiate()
-        {
-            return autofacContainer.Resolve<LoginController>();
-        }
-
-        [Benchmark]
-        public LoginController AbiocContainerInstantiate()
-        {
-            return abiocContainer.GetService<LoginController>();
         }
     }
 }
