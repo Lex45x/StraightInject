@@ -72,8 +72,7 @@ namespace StraightInject.Core.Compilers
             {
                 var action = dependencyConstructors[value.GetType()]
                     .Compile(flatContainer, value, knownTypes, dependencies, InitialState, StateField);
-                Console.WriteLine("[{0}] Compiling ServiceType {1}", GetType().Name,
-                    key.FullName);
+                DebugMode.Execute(() => Console.WriteLine("[{0}] Compiling ServiceType {1}", GetType().Name, key.FullName));
                 knownTypes.Add(key, action);
             }
 
