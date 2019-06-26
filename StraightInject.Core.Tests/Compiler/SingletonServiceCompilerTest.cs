@@ -16,8 +16,6 @@ namespace StraightInject.Core.Tests.Compiler
         [Test]
         public void CompilationTest()
         {
-            Environment.SetEnvironmentVariable("STRAIGHT_INJECT_ENABLE_DIAGNOSTIC", "true");
-
             var compiler = new SingletonServiceCompiler();
             var stubCompiler = new DynamicAssemblyJumpTableOfTypeHandleContainerCompiler(
                 new Dictionary<Type, IServiceCompiler>
