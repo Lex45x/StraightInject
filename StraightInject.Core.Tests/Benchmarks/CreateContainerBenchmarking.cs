@@ -1,5 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using StraightInject.Core.Tests.Services;
+using StraightInject.Core.Tests.Services.MVC.Configuration;
+using StraightInject.Core.Tests.Services.MVC.DataAccess;
 
 namespace StraightInject.Core.Tests.Benchmarks
 {
@@ -10,9 +12,9 @@ namespace StraightInject.Core.Tests.Benchmarks
         public CreateContainerBenchmarking()
         {
             composer = DefaultDependencyComposer.Initialize();
-            composer.FromType<PlainService>().ToService<IPlainService>();
-            composer.FromType<DependentService>().ToService<IDependentService>();
-            composer.FromType<DependencyService>().ToService<IDependencyService>();
+            composer.FromType<CacheConfiguration>().ToService<ICacheConfiguration>();
+            composer.FromType<DatabaseConfiguration>().ToService<IDatabaseConfiguration>();
+            composer.FromType<UnitOfWork>().ToService<IUserRepository>();
         }
 
         [Benchmark]

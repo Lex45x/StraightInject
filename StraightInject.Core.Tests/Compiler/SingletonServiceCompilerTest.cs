@@ -6,6 +6,7 @@ using StraightInject.Core.ConstructorResolver;
 using StraightInject.Core.ServiceConstructors;
 using StraightInject.Core.Services;
 using StraightInject.Core.Tests.Services;
+using StraightInject.Core.Tests.Services.MVC.Configuration;
 using StraightInject.Services;
 
 namespace StraightInject.Core.Tests.Compiler
@@ -23,21 +24,21 @@ namespace StraightInject.Core.Tests.Compiler
                     [typeof(SingletonService)] = compiler
                 });
 
-            var interfaceService = new SingletonService(typeof(PlainService), new EagerConstructorResolver(),
-                typeof(IPlainService));
-            var classService = new SingletonService(typeof(PlainService), new EagerConstructorResolver(),
-                typeof(PlainService));
+            var interfaceService = new SingletonService(typeof(CacheConfiguration), new EagerConstructorResolver(),
+                typeof(ICacheConfiguration));
+            var classService = new SingletonService(typeof(CacheConfiguration), new EagerConstructorResolver(),
+                typeof(CacheConfiguration));
 
             var dependencies = new Dictionary<Type, IService>
             {
-                [typeof(IPlainService)] = interfaceService,
-                [typeof(PlainService)] = classService
+                [typeof(ICacheConfiguration)] = interfaceService,
+                [typeof(CacheConfiguration)] = classService
             };
 
             var container = stubCompiler.CompileDependencies(dependencies);
 
-            var plainServiceInterface = container.Resolve<IPlainService>();
-            var plainService = container.Resolve<PlainService>();
+            var plainServiceInterface = container.Resolve<ICacheConfiguration>();
+            var plainService = container.Resolve<CacheConfiguration>();
 
             Assert.IsNotNull(plainService);
             Assert.IsNotNull(plainServiceInterface);
