@@ -6,9 +6,9 @@ namespace StraightInject
     public interface IDependencyMapper
     {
         /// <summary>
-        /// Create a new rule that allow to map <typeparamref name="T"/> as a specific service
+        /// Create a new rule that allow to map <typeparamref name="TComponent"/> as a specific service
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TComponent"></typeparam>
         /// <returns></returns>
         ITypedComponentComposer<IConstructableService,TComponent> FromType<TComponent>();
 
@@ -33,6 +33,4 @@ namespace StraightInject
         /// <returns></returns>
         IContainer Compile();
     }
-
-    
 }

@@ -26,7 +26,7 @@ namespace StraightInject.Core.Debugging
         }
 
         /// <summary>
-        /// Execute and action if DebugMode is enabled
+        /// Execute an action if DebugMode is enabled
         /// </summary>
         /// <param name="action"></param>
         public static void Execute(Action action)

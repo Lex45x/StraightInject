@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using StraightInject.Core.Debugging;
 using StraightInject.Services;
 
 namespace StraightInject.Core.ConstructorResolver
@@ -13,6 +15,12 @@ namespace StraightInject.Core.ConstructorResolver
     {
         public ConstructorInfo Resolve(Type component, Dictionary<Type, IService> dependencies)
         {
+            DebugMode.Execute(
+                () =>
+                {
+                    Console.WriteLine("[{0}] Resolving constructor for type {1}",
+                        GetType().Name, component.FullName);
+                });
             var constructors =
                 component.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
 
@@ -30,6 +38,18 @@ namespace StraightInject.Core.ConstructorResolver
 
                 if (allParametersAvailable)
                 {
+                    DebugMode.Execute(
+                        () =>
+                        {
+                            Console.WriteLine("[{0}] Resolved constructor for type {1}{2}",
+                                GetType().Name, component.FullName,
+                                constructor.GetParameters()
+                                    .Aggregate(new StringBuilder(constructor.GetParameters().Any()
+                                            ? ", with params "
+                                            : null),
+                                        (builder, info) => builder.Append(
+                                            $" Name: {info.Name}, Type: {info.ParameterType.FullName}")));
+                        });
                     return constructor;
                 }
             }
