@@ -10,7 +10,7 @@ namespace StraightInject
         /// </summary>
         /// <typeparam name="TComponent"></typeparam>
         /// <returns></returns>
-        ITypedComponentComposer<IConstructableService,TComponent> FromType<TComponent>();
+        ITypedComponentComposer<IConstructableService, TComponent> FromType<TComponent>();
 
         /// <summary>
         /// Same as <see cref="FromType{TComponent}"/> but with implicit type passing
@@ -26,7 +26,7 @@ namespace StraightInject
         /// <param name="instance"></param>
         /// <returns></returns>
         IComponentComposer<IService, TComponent> FromInstance<TComponent>(TComponent instance);
-
+        
         /// <summary>
         /// Compile existing map to a Completed container
         /// </summary>
